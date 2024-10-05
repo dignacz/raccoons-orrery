@@ -7,13 +7,11 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
     }
     return response.json();  // Parse the JSON data from the response
 })
-    .then(asteroidData => {
-        console.log(asteroidData);  // Now you have access to the JSON data
-        // displayData(asteroidData);
-        processAsteroidData(asteroidData);
-    })
-    .catch(error => console.error('Error loading the JSON file:', error));
-
+.then(asteroidData => {
+    window.asteroidData = asteroidData; // Store asteroid data globally for click access
+    processAsteroidData(asteroidData);
+})
+.catch(error => console.error('Error loading the JSON file:', error));
 
 // Degrees to Radians
 function degreesToRadians(degrees) {
@@ -105,9 +103,10 @@ function addBallToAsteroidOrbit(orbitPoints) {
 }
 
 
-function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha = "N") {
-    let asteroidContainerPHA;
-    let asteroidContainerNonPHA;
+// Function to create and append asteroid orbit and position marker to x3dom scene
+function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = "N") {
+    let asteroidContainerPHA = document.getElementById("asteroidOrbitContainerPHA");
+    let asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
 
     if (pha === "Y") {
         asteroidContainerPHA = document.getElementById("asteroidOrbitContainerPHA");
@@ -118,6 +117,7 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha 
     }
 
     const asteroidShape = document.createElement("shape");
+    asteroidShape.setAttribute("id", objectId); // Set object ID for click event association
 
     const aAppearance = document.createElement("appearance");
     const aMaterial = document.createElement("material");
@@ -140,13 +140,13 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha 
     asteroidShape.appendChild(aIndexedLineSet);
     if (pha === "Y") {
         asteroidContainerPHA.appendChild(asteroidShape);
-    }
-    else {
+    } else {
         asteroidContainerNonPHA.appendChild(asteroidShape);
     }
 
     // Create a sphere to mark the current position of the asteroid
     const currentShape = document.createElement("shape");
+
     const currentAppearance = document.createElement("appearance");
     const currentMaterial = document.createElement("material");
     currentMaterial.setAttribute("diffuseColor", "0 1 0"); // Green for the current position marker
@@ -156,18 +156,18 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha 
     const currentTransform = document.createElement("transform");
     currentTransform.setAttribute("translation", currentPosition);
     const currentSphere = document.createElement("sphere");
+    currentShape.setAttribute("id", objectId); // Set object ID for click event association
     currentSphere.setAttribute("radius", "0.008");
     currentShape.appendChild(currentSphere);
     currentTransform.appendChild(currentShape);
     if (pha === "Y") {
         asteroidContainerPHA.appendChild(currentTransform);
-    }
-    else {
+    } else {
         asteroidContainerNonPHA.appendChild(currentTransform);
     }
 }
 
-// 3. Update processAsteroidData to add the ball
+// Update processAsteroidData to handle full attribute display
 function processAsteroidData(asteroidData) {
     asteroidData.forEach(obj => {
         const eccentricity = parseFloat(obj.e);
@@ -177,17 +177,13 @@ function processAsteroidData(asteroidData) {
         const node = parseFloat(obj.om);
         const tp = parseFloat(obj.tp);
         const PHA = obj.pha; // Corrected to retrieve PHA as a string
+        const objectId = obj.full_name;
 
         // Calculate the orbit points and current position
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
 
         // Plot the orbit and the current position in X3D
-        createAsteroidOrbitShape(aOrbitPoints, currentPosition, obj.full_name, PHA);
-
-        // Add the ball to the first asteroid orbit (as an example)
-        if (obj.full_name === asteroidData[0].full_name) {
-            addBallToAsteroidOrbit(aOrbitPoints);
-        }
+        createAsteroidOrbitShape(aOrbitPoints, currentPosition, objectId, PHA);
     });
 }

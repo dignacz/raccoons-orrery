@@ -7,10 +7,18 @@ fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
         return response.json();  // Parse the JSON data from the response
     })
     .then(cometData => {
-        console.log(cometData);  // Now you have access to the JSON data
+        window.cometData = cometData; // Store comet data globally for click access
         processCometData(cometData);
     })
     .catch(error => console.error('Error loading the JSON file:', error));
+
+// Function to calculate semi-major axis
+function calculateSemiMajorAxis(e, q) {
+    if (e >= 1) {
+        return Infinity; // For parabolic or hyperbolic orbits
+    }
+    return q / (1 - e);  // Semi-major axis formula
+}
 
 // Degrees to Radians
 function degreesToRadians(degrees) {
@@ -89,8 +97,8 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
     return `${x} ${y} ${z}`;
 }
 
-// 4. Function to create and append comet orbit and position marker to x3dom scene
-function createCometeOrbitShape(cOrbitPoints, currentPosition, objectName) {
+// Function to create and append comet orbit and position marker to x3dom scene
+function createCometeOrbitShape(cOrbitPoints, currentPosition,  objectId) {
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
     cometOrbitContainer.setAttribute('visible', 'false'); // Ensure it's visible by default
 
@@ -102,9 +110,7 @@ function createCometeOrbitShape(cOrbitPoints, currentPosition, objectName) {
     cometShape.appendChild(cAppearance);
 
     const cIndexedLineSet = document.createElement("indexedLineSet");
-
-    // Add coordIndex (this just connects the points in a sequential manner)
-    let coordIndex = Array.from({ length: cOrbitPoints.length }, (_, i) => i).join(' ') + " -1"; // "-1" ends the sequence
+    let coordIndex = Array.from({ length: cOrbitPoints.length }, (_, i) => i).join(' ') + " -1";
     cIndexedLineSet.setAttribute("coordIndex", coordIndex);
 
     const cCoordinate = document.createElement("coordinate");
@@ -127,9 +133,11 @@ function createCometeOrbitShape(cOrbitPoints, currentPosition, objectName) {
     const currentSphere = document.createElement("sphere");
     currentSphere.setAttribute("radius", "0.008");
     currentShape.appendChild(currentSphere);
+    currentShape.setAttribute("id", objectId); // Set object ID for click event association
     currentTransform.appendChild(currentShape);
     cometOrbitContainer.appendChild(currentTransform);
 }
+
 
 // 4. Function to create and append the ball to the comet's orbit
 function addBallToCometOrbit(orbitPoints) {
@@ -180,7 +188,7 @@ function animateCometBall(orbitPoints) {
     moveBall();
 }
 
-// 6. Function to process the JSON data
+// Process comet data and add to scene
 function processCometData(cometData) {
     cometData.forEach(obj => {
         let eccentricity = parseFloat(obj.e);
@@ -188,19 +196,14 @@ function processCometData(cometData) {
         let inclination = parseFloat(obj.i_deg);
         let omega = parseFloat(obj.w_deg);
         let node = parseFloat(obj.node_deg);
-        let objectName = obj.object_name;
         let tp = parseFloat(obj.tp_tdb);
+        let objectId = obj.object_name;
 
-        // Calculate semi-major axis for each object
         let semiMajorAxis = calculateSemiMajorAxis(eccentricity, perihelionDistance);
         const cOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
 
         // Plot the orbit and the current position in X3D
-        createCometeOrbitShape(cOrbitPoints, currentPosition, objectName);
-
-        if (objectName === cometData[0].object_name) {
-            addBallToCometOrbit(cOrbitPoints);
-        }
+        createCometeOrbitShape(cOrbitPoints, currentPosition, objectId);
     });
 }

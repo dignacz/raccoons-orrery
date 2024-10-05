@@ -10,6 +10,7 @@
     <script src="js/comets.js"></script>
     <script src="js/asteroids.js"></script>
     <script src="js/toggleOrbits.js"></script>
+    <script src="js/table.js"></script>
     <style>
         html, body {
             height: 100%;
@@ -55,13 +56,21 @@
             padding: 10px;
             font-size: 1em;
         }
+        #infoTable {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="app-window">
         <div class="app-window-header">
             Raccoon Orrery
-            <!-- Add buttons to toggle asteroid and comet orbits -->
             <div class="toggle-buttons">
                 <button id="toggleAsteroidsPHA" />
                 <button id="toggleAsteroidsNonPHA" />
@@ -69,16 +78,17 @@
             </div>
         </div>
         <div class="app-content">
-            <x3d>
-                <scene>
+            <x3d id="x3dElement">
+                <scene id="x3dScene" onclick="sceneClick(event)">
                     <directionalLight intensity="1.2" direction='-1 -1 -1'></directionalLight>
                     <pointLight intensity="0.8" location="2 2 2"></pointLight>
-                    <shape>
+                    <shape id="sun">
                         <appearance>
                             <material emissiveColor="1 1 0"></material>
                         </appearance>
                         <sphere radius="0.05"></sphere>
                     </shape>
+                    
                     <!-- Containers for orbits -->
                     <group id="cometOrbitContainer"></group>
                     <group id="asteroidOrbitContainerPHA"></group>
@@ -87,5 +97,57 @@
             </x3d>
         </div>
     </div>
+    <div id="infoTable">
+        <h4>Asteroid/Comet Information</h4>
+        <p>Name: <span id="infoName">N/A</span></p>
+        <p>Eccentricity: <span id="infoEccentricity">N/A</span></p>
+        <p>Perihelion Distance: <span id="infoSemiMajorAxis">N/A</span></p>
+        <p>Inclination: <span id="infoInclination">N/A</span></p>
+        <p>Omega: <span id="infoOmega">N/A</span></p>
+        <p>Node: <span id="infoNode">N/A</span></p>
+        <p>Time of Periapsis (Tp): <span id="infoTp">N/A</span></p>
+    </div>
+    
+    <script>
+        function sceneClick(event) {
+            const target = event.target;
+    
+            // Verificar si el objeto tiene un id y si es "sun"
+            if (target && target.getAttribute('id')) {
+                const objectId = target.getAttribute('id');
+                console.log('Object ID:', objectId);
+    
+                // Si se hace clic en el sol, imprimir mensaje en pantalla
+                if (objectId === 'sun') {
+                    alert('¡Ten cuidado donde haces clic! No queremos que te quemes :)');
+                    return; // No continuar con el procesamiento para otros objetos
+                }
+    
+                // Buscar la información del cometa o asteroide
+                let obj = findAsteroidOrCometData(objectId);
+                if (obj) {
+                    let eccentricity = parseFloat(obj.e);
+                    let perihelionDistance = parseFloat(obj.a || obj.q_au_1); // Asteroides usan 'a', cometas usan 'q_au_1'
+                    let inclination = parseFloat(obj.i || obj.i_deg);
+                    let omega = parseFloat(obj.w || obj.w_deg);
+                    let node = parseFloat(obj.om || obj.node_deg);
+                    let objectName = obj.full_name || obj.object_name;
+                    let tp = parseFloat(obj.tp || obj.tp_tdb);
+                    let pha = obj.pha || 'N/A';
+    
+                    // Actualizar la tabla de información en la página
+                    updateInfoTable(objectName, eccentricity, perihelionDistance, inclination, omega, node, tp, pha);
+                }
+            }
+        }
+    
+        function findAsteroidOrCometData(objectId) {
+            // Buscar los datos según el ID del objeto
+            return window.cometData?.find(comet => comet.object_name === objectId) || 
+                   window.asteroidData?.find(asteroid => asteroid.full_name === objectId);
+        }
+    </script>
+    
+    
 </body>
 </html>
