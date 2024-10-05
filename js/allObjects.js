@@ -1,4 +1,4 @@
-// Fetch the JSON data from the external file
+// CometData
 fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
     .then(response => {
         if (!response.ok) {
@@ -16,6 +16,21 @@ fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
 function degreesToRadians(degrees) {
     return degrees * (Math.PI / 180);
 }
+
+// AsteroidData
+fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main/asteroid_query_results.json')
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
+    }
+    return response.json();  // Parse the JSON data from the response
+})
+    .then(asteroidData => {
+        console.log(asteroidData);  // Now you have access to the JSON data
+        // displayData(asteroidData);
+        processAsteroidData(asteroidData);
+    })
+    .catch(error => console.error('Error loading the JSON file:', error));
 
 // Calculate current time in Julian centuries since J2000.0
 function getJulianCenturies() {
@@ -131,56 +146,71 @@ function createCometeOrbitShape(cOrbitPoints, currentPosition, objectName) {
     cometOrbitContainer.appendChild(currentTransform);
 }
 
-// 4. Function to create and append the ball to the comet's orbit
-function addBallToCometOrbit(orbitPoints) {
-    const scene = document.querySelector('scene');
-    if (!scene) {
-        console.error("Scene not found");
-        return;
+function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha = "N") {
+    let asteroidContainerPHA;
+    let asteroidContainerNonPHA;
+
+    if (pha === "Y") {
+        asteroidContainerPHA = document.getElementById("asteroidOrbitContainerPHA");
+        asteroidContainerPHA.setAttribute('visible', 'false'); // Ensure it's visible by default
+    } else {
+        asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
+        asteroidContainerNonPHA.setAttribute('visible', 'false'); // Ensure it's visible by default
     }
 
-    const ballTransform = document.createElement('transform');
-    ballTransform.setAttribute('id', 'cometOrbitBall');
+    const asteroidShape = document.createElement("shape");
 
-    const ballShape = document.createElement('shape');
-    const ballAppearance = document.createElement('appearance');
-    const ballMaterial = document.createElement('material');
-    ballMaterial.setAttribute('diffuseColor', '1 0 0'); // Yellow color for the ball
-    ballAppearance.appendChild(ballMaterial);
-    ballShape.appendChild(ballAppearance);
-
-    const ballSphere = document.createElement('sphere');
-    ballSphere.setAttribute('radius', '0.1'); // Small sphere for the comet ball
-    ballShape.appendChild(ballSphere);
-
-    ballTransform.appendChild(ballShape);
-    scene.appendChild(ballTransform);
-
-    animateCometBall(orbitPoints);
-}
-
-// 5. Function to animate the ball along the comet orbit points
-function animateCometBall(orbitPoints) {
-    let pointIndex = 0;
-
-    function moveBall() {
-        if (pointIndex >= orbitPoints.length) {
-            pointIndex = 0; // Loop back to start
-        }
-        const ballTransform = document.getElementById('cometOrbitBall');
-        if (ballTransform) {
-            ballTransform.setAttribute('translation', orbitPoints[pointIndex]);
-        } else {
-            console.error("Ball transform not found");
-        }
-        pointIndex++;
-
-        requestAnimationFrame(moveBall);
+    const aAppearance = document.createElement("appearance");
+    const aMaterial = document.createElement("material");
+    if (pha === "Y") {
+        aMaterial.setAttribute("emissiveColor", "1 0 0"); // Red color for potentially hazardous asteroids
+    } else {
+        aMaterial.setAttribute("emissiveColor", "0.30 0.30 0.30"); // Grey color for non-hazardous asteroids
     }
-    moveBall();
+    aAppearance.appendChild(aMaterial);
+    asteroidShape.appendChild(aAppearance);
+
+    const aIndexedLineSet = document.createElement("indexedLineSet");
+    let coordIndex = Array.from({ length: orbitPoints.length }, (_, i) => i).join(' ') + " -1";
+    aIndexedLineSet.setAttribute("coordIndex", coordIndex);
+
+    const aCoordinate = document.createElement("coordinate");
+    aCoordinate.setAttribute("point", orbitPoints.join(' '));
+    aIndexedLineSet.appendChild(aCoordinate);
+
+    asteroidShape.appendChild(aIndexedLineSet);
+    if (pha === "Y") {
+        asteroidContainerPHA.appendChild(asteroidShape);
+    }
+    else {
+        asteroidContainerNonPHA.appendChild(asteroidShape);
+    }
+
+    // Create a sphere to mark the current position of the asteroid
+    const currentShape = document.createElement("shape");
+    const currentAppearance = document.createElement("appearance");
+    const currentMaterial = document.createElement("material");
+    currentMaterial.setAttribute("diffuseColor", "0 1 0"); // Green for the current position marker
+    currentAppearance.appendChild(currentMaterial);
+    currentShape.appendChild(currentAppearance);
+
+    const currentTransform = document.createElement("transform");
+    currentTransform.setAttribute("translation", currentPosition);
+    const currentSphere = document.createElement("sphere");
+    currentSphere.setAttribute("radius", "0.008");
+    currentShape.appendChild(currentSphere);
+    currentTransform.appendChild(currentShape);
+    if (pha === "Y") {
+        asteroidContainerPHA.appendChild(currentTransform);
+    }
+    else {
+        asteroidContainerNonPHA.appendChild(currentTransform);
+    }
 }
 
-// 6. Function to process the JSON data
+
+
+// Process Comet Data
 function processCometData(cometData) {
     cometData.forEach(obj => {
         let eccentricity = parseFloat(obj.e);
@@ -199,8 +229,26 @@ function processCometData(cometData) {
         // Plot the orbit and the current position in X3D
         createCometeOrbitShape(cOrbitPoints, currentPosition, objectName);
 
-        if (objectName === cometData[0].object_name) {
-            addBallToCometOrbit(cOrbitPoints);
-        }
+    });
+}
+
+// Process Asteroid Data
+function processAsteroidData(asteroidData) {
+    asteroidData.forEach(obj => {
+        const eccentricity = parseFloat(obj.e);
+        const semiMajorAxis = parseFloat(obj.a);
+        const inclination = parseFloat(obj.i);
+        const omega = parseFloat(obj.w);
+        const node = parseFloat(obj.om);
+        const tp = parseFloat(obj.tp);
+        const PHA = obj.pha; // Corrected to retrieve PHA as a string
+
+        // Calculate the orbit points and current position
+        const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
+        const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
+
+        // Plot the orbit and the current position in X3D
+        createAsteroidOrbitShape(aOrbitPoints, currentPosition, obj.full_name, PHA);
+        
     });
 }
