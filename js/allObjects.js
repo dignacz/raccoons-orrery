@@ -7,7 +7,8 @@ fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
         return response.json();  // Parse the JSON data from the response
     })
     .then(cometData => {
-        console.log(cometData);  // Now you have access to the JSON data
+        console.log(cometData); 
+        window.cometData = cometData; // Now you have access to the JSON data
         processCometData(cometData);
     })
     .catch(error => console.error('Error loading the JSON file:', error));
@@ -27,16 +28,18 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
 })
     .then(asteroidData => {
         console.log(asteroidData);  // Now you have access to the JSON data
+        window.asteroidData = asteroidData; // Store comet data globally for click access
         // displayData(asteroidData);
         processAsteroidData(asteroidData);
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
-// Calculate current time in Julian centuries since J2000.0
-function getJulianCenturies() {
-    const now = new Date();
-    const JD = 2451545.0 + (now - new Date(Date.UTC(2000, 0, 1, 12))) / 86400000;
-    return (JD - 2451545.0) / 36525.0;
+// SLIDER
+
+ // Calculate Julian Centuries for a given date
+ function getJulianDate() {
+    const date = new Date(Date.UTC(2020, 1, 8, 15));
+    return 2451545.0 + (date - new Date(Date.UTC(2000, 0, 1, 12))) / 86400000;
 }
 
 // 1. Function to calculate semi-major axis
@@ -78,10 +81,10 @@ function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, n
 
 // 3. Function to calculate the current position of a comet in its orbit
 function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp) {
-    let t = getJulianCenturies(); // Current time in Julian centuries
-    let tpCenturies = (tp - 2451545.0) / 36525.0; // Time of periapsis in Julian centuries
+    let t = getJulianDate(); // Current time in Julian date
+    console.log(t);
     let meanMotion = Math.sqrt(1 / Math.pow(semiMajorAxis, 3));
-    let meanAnomaly = meanMotion * (t - tpCenturies);
+    let meanAnomaly = meanMotion * (t - tp);
     let trueAnomaly = meanAnomaly; // Simplified - normally we would iterate to solve Kepler's equation
 
     let r = (semiMajorAxis * (1 - Math.pow(eccentricity, 2))) / (1 + eccentricity * Math.cos(trueAnomaly));
@@ -105,7 +108,7 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
 }
 
 // 4. Function to create and append comet orbit and position marker to x3dom scene
-function createCometeOrbitShape(cOrbitPoints, currentPosition, objectName) {
+function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId) {
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
     cometOrbitContainer.setAttribute('visible', 'false'); // Ensure it's visible by default
 
@@ -136,6 +139,7 @@ function createCometeOrbitShape(cOrbitPoints, currentPosition, objectName) {
     currentMaterial.setAttribute("diffuseColor", "0.53 0.81 0.98"); // Light blue for the current position marker
     currentAppearance.appendChild(currentMaterial);
     currentShape.appendChild(currentAppearance);
+    currentShape.setAttribute("id", objectId);
 
     const currentTransform = document.createElement("transform");
     currentTransform.setAttribute("translation", currentPosition);
@@ -146,7 +150,7 @@ function createCometeOrbitShape(cOrbitPoints, currentPosition, objectName) {
     cometOrbitContainer.appendChild(currentTransform);
 }
 
-function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha = "N") {
+function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = "N") {
     let asteroidContainerPHA;
     let asteroidContainerNonPHA;
 
@@ -169,6 +173,7 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha 
     }
     aAppearance.appendChild(aMaterial);
     asteroidShape.appendChild(aAppearance);
+    asteroidShape.setAttribute("id", objectId); 
 
     const aIndexedLineSet = document.createElement("indexedLineSet");
     let coordIndex = Array.from({ length: orbitPoints.length }, (_, i) => i).join(' ') + " -1";
@@ -197,6 +202,7 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha 
     const currentTransform = document.createElement("transform");
     currentTransform.setAttribute("translation", currentPosition);
     const currentSphere = document.createElement("sphere");
+    currentShape.setAttribute("id", objectId); 
     currentSphere.setAttribute("radius", "0.008");
     currentShape.appendChild(currentSphere);
     currentTransform.appendChild(currentShape);
@@ -220,6 +226,7 @@ function processCometData(cometData) {
         let node = parseFloat(obj.node_deg);
         let objectName = obj.object_name;
         let tp = parseFloat(obj.tp_tdb);
+        let objectId = obj.object_name;
 
         // Calculate semi-major axis for each object
         let semiMajorAxis = calculateSemiMajorAxis(eccentricity, perihelionDistance);
@@ -227,7 +234,7 @@ function processCometData(cometData) {
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
 
         // Plot the orbit and the current position in X3D
-        createCometeOrbitShape(cOrbitPoints, currentPosition, objectName);
+        createCometeOrbitShape(cOrbitPoints, currentPosition, objectId);
 
     });
 }
@@ -242,13 +249,14 @@ function processAsteroidData(asteroidData) {
         const node = parseFloat(obj.om);
         const tp = parseFloat(obj.tp);
         const PHA = obj.pha; // Corrected to retrieve PHA as a string
+        const objectId = obj.full_name;
 
         // Calculate the orbit points and current position
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
 
         // Plot the orbit and the current position in X3D
-        createAsteroidOrbitShape(aOrbitPoints, currentPosition, obj.full_name, PHA);
+        createAsteroidOrbitShape(aOrbitPoints, currentPosition, objectId, PHA);
         
     });
 }
