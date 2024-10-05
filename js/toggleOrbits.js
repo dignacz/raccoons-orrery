@@ -1,28 +1,37 @@
 document.addEventListener('DOMContentLoaded', function () {
+    function isOn(element) {
+      return element.getAttribute('visible') === 'false';
+    }
+    function turnOn(label) {
+      return label + ' ON';
+    }
+    function turnOff(label) {
+      return label + ' OFF';
+    }
+
+    function setupToggle(toggleButtonId, containerId, label) {
+        const toggleButton = document.getElementById(toggleButtonId);
+        toggleButton.textContent = turnOff(label);
+
+        toggleButton.addEventListener('click', function(e) {
+            const container = document.getElementById(containerId);
+
+            // Change label
+            e.target.textContent = isOn(container) ? turnOn(label) : turnOff(label);
+
+            if (container) {
+                const isHidden = container.getAttribute('visible') === 'false';
+                container.setAttribute('visible', isHidden ? 'true' : 'false');
+            }
+        });
+    }
+
     // Toggle Asteroids (PHA N)
-    document.getElementById('toggleAsteroidsPHA').addEventListener('click', function() {
-        const asteroidContainerPHA = document.getElementById('asteroidOrbitContainerPHA');
-        if (asteroidContainerPHA) {
-            const isHidden = asteroidContainerPHA.getAttribute('visible') === 'false';
-            asteroidContainerPHA.setAttribute('visible', isHidden ? 'true' : 'false');
-        }
-    });
+    setupToggle('toggleAsteroidsPHA', 'asteroidOrbitContainerPHA', 'Toggle Asteroids (PHA Y)');
 
     // Toggle Asteroids (Non-PHA N)
-    document.getElementById('toggleAsteroidsNonPHA').addEventListener('click', function() {
-        const asteroidContainerNonPHA = document.getElementById('asteroidOrbitContainerNonPHA');
-        if (asteroidContainerNonPHA) {
-            const isHidden = asteroidContainerNonPHA.getAttribute('visible') === 'false';
-            asteroidContainerNonPHA.setAttribute('visible', isHidden ? 'true' : 'false');
-        }
-    });
+    setupToggle('toggleAsteroidsNonPHA', 'asteroidOrbitContainerNonPHA', 'Toggle Asteroids (Non-PHA Y)');
 
     // Toggle Comets
-    document.getElementById('toggleComets').addEventListener('click', function() {
-        const cometContainer = document.getElementById('cometOrbitContainer');
-        if (cometContainer) {
-            const isHidden = cometContainer.getAttribute('visible') === 'false';
-            cometContainer.setAttribute('visible', isHidden ? 'true' : 'false');
-        }
-    });
+    setupToggle('toggleComets', 'cometOrbitContainer', 'Toggle Comets');
 });
