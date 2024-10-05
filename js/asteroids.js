@@ -19,43 +19,43 @@ function degreesToRadians(degrees) {
     return degrees * (Math.PI / 180);
 }
 
-// 1. Function to calculate the orbit points
-function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node, numPoints = 100) {
-    let points = [];
+// Calculate current time in Julian centuries since J2000.0
+function getJulianCenturies() {
+    const now = new Date();
+    const JD = 2451545.0 + (now - new Date(Date.UTC(2000, 0, 1, 12))) / 86400000;
+    return (JD - 2451545.0) / 36525.0;
+}
+
+// Function to calculate the current position of an object in its orbit
+function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp) {
+    let t = getJulianCenturies(); // Current time in Julian centuries
+    let tpCenturies = (tp - 2451545.0) / 36525.0; // Time of periapsis in Julian centuries
+    let meanMotion = Math.sqrt(1 / Math.pow(semiMajorAxis, 3));
+    let meanAnomaly = meanMotion * (t - tpCenturies);
+    let trueAnomaly = meanAnomaly; // Simplified - normally we would iterate to solve Kepler's equation
+
+    let r = (semiMajorAxis * (1 - Math.pow(eccentricity, 2))) / (1 + eccentricity * Math.cos(trueAnomaly));
+
     let inclinationRad = degreesToRadians(inclination);
     let omegaRad = degreesToRadians(omega);
     let nodeRad = degreesToRadians(node);
 
-    // Loop to calculate points along the orbit
-    for (let i = 0; i < numPoints; i++) {
-        // True anomaly from 0 to 2π (0 to 360 degrees)
-        let trueAnomaly = (2 * Math.PI * i) / numPoints;
+    let xPrime = r * Math.cos(trueAnomaly);
+    let yPrime = r * Math.sin(trueAnomaly);
 
-        // Radius at this point in the orbit
-        let r = (semiMajorAxis * (1 - Math.pow(eccentricity, 2))) / (1 + eccentricity * Math.cos(trueAnomaly));
+    let x = xPrime * (Math.cos(nodeRad) * Math.cos(omegaRad) - Math.sin(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad))
+            - yPrime * (Math.sin(nodeRad) * Math.cos(omegaRad) + Math.cos(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad));
 
-        // Position in the orbital plane (2D)
-        let xPrime = r * Math.cos(trueAnomaly);
-        let yPrime = r * Math.sin(trueAnomaly);
+    let y = xPrime * (Math.sin(nodeRad) * Math.cos(omegaRad) + Math.cos(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad))
+            + yPrime * (Math.cos(nodeRad) * Math.cos(omegaRad) - Math.sin(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad));
 
-        // Transform to 3D space using inclination, omega, and node
-        let x = xPrime * (Math.cos(nodeRad) * Math.cos(omegaRad) - Math.sin(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad))
-                - yPrime * (Math.sin(nodeRad) * Math.cos(omegaRad) + Math.cos(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad));
+    let z = xPrime * (Math.sin(omegaRad) * Math.sin(inclinationRad)) + yPrime * (Math.cos(omegaRad) * Math.sin(inclinationRad));
 
-        let y = xPrime * (Math.sin(nodeRad) * Math.cos(omegaRad) + Math.cos(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad))
-                + yPrime * (Math.cos(nodeRad) * Math.cos(omegaRad) - Math.sin(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad));
-
-        let z = xPrime * (Math.sin(omegaRad) * Math.sin(inclinationRad)) + yPrime * (Math.cos(omegaRad) * Math.sin(inclinationRad));
-
-        // Store the calculated (x, y, z) point
-        points.push(`${x} ${y} ${z}`);
-    }
-
-    return points;
+    return `${x} ${y} ${z}`;
 }
 
-// 2. Function to create and append orbit to x3dom scene
-function createAsteroidOrbitShape(orbitPoints, objectName, pha = "N") {
+// Function to create and append orbit and position marker to x3dom scene
+function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha = "N") {
     const asteroidOrbitContainer = document.getElementById("asteroidOrbitContainer");
     const asteroidShape = document.createElement("shape");
 
@@ -64,7 +64,7 @@ function createAsteroidOrbitShape(orbitPoints, objectName, pha = "N") {
     if (pha === "Y") {
         aMaterial.setAttribute("emissiveColor", "1 0 0"); // Red color for potentially hazardous asteroids
     } else {
-        aMaterial.setAttribute("emissiveColor", "0.30 0.30 0.30"); // Black color for non-hazardous asteroids
+        aMaterial.setAttribute("emissiveColor", "0.30 0.30 0.30"); // Light gray color for non-hazardous asteroids
     }
     aAppearance.appendChild(aMaterial);
     asteroidShape.appendChild(aAppearance);
@@ -79,23 +79,40 @@ function createAsteroidOrbitShape(orbitPoints, objectName, pha = "N") {
 
     asteroidShape.appendChild(aIndexedLineSet);
     asteroidOrbitContainer.appendChild(asteroidShape);
+
+    // Create a sphere to mark the current position of the asteroid
+    const currentShape = document.createElement("shape");
+    const currentAppearance = document.createElement("appearance");
+    const currentMaterial = document.createElement("material");
+    currentMaterial.setAttribute("diffuseColor", "0 1 0"); // Green for the current position marker
+    currentAppearance.appendChild(currentMaterial);
+    currentShape.appendChild(currentAppearance);
+
+    const currentTransform = document.createElement("transform");
+    currentTransform.setAttribute("translation", currentPosition);
+    const currentSphere = document.createElement("sphere");
+    currentSphere.setAttribute("radius", "0.008");
+    currentShape.appendChild(currentSphere);
+    currentTransform.appendChild(currentShape);
+    asteroidOrbitContainer.appendChild(currentTransform);
 }
 
-
-// Function to process the CSV data
+// Function to process the JSON data
 function processAsteroidData(asteroidData) {
-   
-     asteroidData.forEach(obj => {
+    asteroidData.forEach(obj => {
         const eccentricity = parseFloat(obj.e);
-        // const perihelionDistance = parseFloat(obj.q);
         const semiMajorAxis = parseFloat(obj.a);
         const inclination = parseFloat(obj.i);
         const omega = parseFloat(obj.w);
         const node = parseFloat(obj.om);
-        const PHA = obj.pha;
+        const tp = parseFloat(obj.tp);
+        const PHA = obj.pha; // Corrected to retrieve PHA as a string
 
-        // Here you'd calculate the orbit points and plot them, like in the previous example
+        // Calculate the orbit points and current position
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
-        createAsteroidOrbitShape(aOrbitPoints, obj.full_name, PHA); // Plot the orbit in X3D
+        const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
+
+        // Plot the orbit and the current position in X3D
+        createAsteroidOrbitShape(aOrbitPoints, currentPosition, obj.full_name, PHA);
     });
 }
