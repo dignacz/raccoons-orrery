@@ -54,38 +54,28 @@ function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, n
     return points;
 }
 
-// // 2. Function to create and append orbit to x3dom scene
-// function createOrbitShape(aOrbitPoints, objectName) {
-//     const asteroidOrbitContainer = document.getElementById("asteroidOrbitContainer");
+// 2. Function to create and append orbit to x3dom scene
+function createAsteroidOrbitShape(orbitPoints, objectName) {
+    const asteroidOrbitContainer = document.getElementById("asteroidOrbitContainer");
+    const asteroidShape = document.createElement("shape");
 
-//     // Create <shape> element for the orbit
-//     const asteroidShape = document.createElement("shape");
+    const aAppearance = document.createElement("appearance");
+    const aMaterial = document.createElement("material");
+    aMaterial.setAttribute("emissiveColor", "1 0 0"); // Red color for asteroid orbits
+    aAppearance.appendChild(aMaterial);
+    asteroidShape.appendChild(aAppearance);
 
-//     // Set appearance (e.g., line color)
-//     const aAppearance = document.createElement("appearance");
-//     const aMaterial = document.createElement("material");
-//     aMaterial.setAttribute("emissiveColor", "0 0 1"); // Blue color
-//     aAppearance.appendChild(aMaterial);
-//     asteroidShape.appendChild(aAppearance);
+    const aIndexedLineSet = document.createElement("indexedLineSet");
+    let coordIndex = Array.from({ length: orbitPoints.length }, (_, i) => i).join(' ') + " -1";
+    aIndexedLineSet.setAttribute("coordIndex", coordIndex);
 
-//     // Create <indexedLineSet> element to hold the orbit line
-//     const aIndexedLineSet = document.createElement("indexedLineSet");
+    const aCoordinate = document.createElement("coordinate");
+    aCoordinate.setAttribute("point", orbitPoints.join(' '));
+    aIndexedLineSet.appendChild(aCoordinate);
 
-//     // Add coordIndex (this just connects the points in a sequential manner)
-//     let coordIndex = Array.from({length: aOrbitPoints.length}, (_, i) => i).join(' ') + " -1"; // "-1" ends the sequence
-//     aIndexedLineSet.setAttribute("coordIndex", coordIndex);
-
-//     // Create <coordinate> element and add calculated points
-//     const aCoordinate = document.createElement("coordinate");
-//     aCoordinate.setAttribute("point", aOrbitPoints.join(', ')); // Insert points as "x y z, x y z, ..."
-//     aIndexedLineSet.appendChild(aCoordinate);
-
-//     // Append the indexedLineSet to the shape
-//     asteroidShape.appendChild(aIndexedLineSet);
-
-//     // Finally, append the shape to the orbitContainer in the x3dom scene
-//     asteroidOrbitContainer.appendChild(asteroidShape);
-// }
+    asteroidShape.appendChild(aIndexedLineSet);
+    asteroidOrbitContainer.appendChild(asteroidShape);
+}
 
 
 // Function to process the CSV data
@@ -101,6 +91,6 @@ function processAsteroidData(asteroidData) {
 
         // Here you'd calculate the orbit points and plot them, like in the previous example
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
-        createOrbitShape(aOrbitPoints, obj.full_name); // Plot the orbit in X3D
+        createAsteroidOrbitShape(aOrbitPoints, obj.full_name); // Plot the orbit in X3D
     });
 }

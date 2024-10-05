@@ -5,53 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raccoons to the Moon - Orrery</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link> 
-    <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script>
-    <script src="js/comets.js"></script> 
+    <link rel='stylesheet' type='text/css' href="https://www.x3dom.org/download/x3dom.css">
+    <script type='text/javascript' src="https://www.x3dom.org/download/x3dom.js"></script>
+    <script src="js/comets.js"></script>
     <script src="js/asteroids.js"></script>
-    <script src="js/orbit_to_x3dom.js"></script>
-    <!-- <script src="js/table.js"></script> -->
 </head>
 <body>
-
     <div class="app-window">
         <div class="app-window-header">
             Raccoon Orrery
         </div>
         <div class="app-content">
-            <x3d width='800px' height='600px'> 
+            <x3d width='800px' height='600px'>
                 <scene>
-                    <!-- Add a simple light source -->
-                    <directionalLight intensity="0.8" direction='-1 -1 -1'></directionalLight>
-            
-                    <!-- Add a sphere for the central object (e.g., Sun) -->
+                    <!-- Add a stronger directional light -->
+                    <directionalLight intensity="1.2" direction='-1 -1 -1'></directionalLight>
+                    <!-- Add an ambient light to make the entire scene brighter -->
+                    <pointLight intensity="0.8" location="2 2 2"></pointLight>
+                    <!-- Add a sphere for the central object (e.g., Sun) with an emissive material -->
                     <shape>
                         <appearance>
-                            <material diffuseColor="1 1 0"></material> <!-- Yellow for the Sun -->
+                            
                         </appearance>
                         <sphere radius="0.05"></sphere> <!-- Sun at center -->
                     </shape>
-            
                     <!-- Placeholder for multiple orbits -->
                     <group id="cometOrbitContainer"></group>
                     <group id="asteroidOrbitContainer"></group>
                 </scene>
-                
-            </x3d> 
+            </x3d>
         </div>
-
-    <!-- <div style="margin-top: 20px;"></div>
-        
-        <h2>Planetary Data</h2>
-        <table id="planetaryTable">
-            <thead>
-                <tr><th>Parameter</th><th>Value</th></tr>
-            </thead>
-            <tbody>
-                
-            </tbody>
-        </table>
-    </div> -->
-    
+    </div>
 </body>
 </html>

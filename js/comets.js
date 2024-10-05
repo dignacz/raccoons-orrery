@@ -62,38 +62,38 @@ function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, n
     return points;
 }
 
-// // 3. Function to create and append orbit to x3dom scene
-// function createOrbitShape(cOrbitPoints, objectName) {
-//     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
+// 3. Function to create and append orbit to x3dom scene
+function createCometeOrbitShape(cOrbitPoints, objectName) {
+    const cometOrbitContainer = document.getElementById("cometOrbitContainer");
 
-//     // Create <shape> element for the orbit
-//     const cometShape = document.createElement("shape");
+    // Create <shape> element for the orbit
+    const cometShape = document.createElement("shape");
 
-//     // Set appearance (e.g., line color)
-//     const cAppearance = document.createElement("appearance");
-//     const cMaterial = document.createElement("material");
-//     cMaterial.setAttribute("emissiveColor", "1 0 0"); 
-//     cAppearance.appendChild(cMaterial);
-//     cometShape.appendChild(cAppearance);
+    // Set appearance (e.g., line color)
+    const cAppearance = document.createElement("appearance");
+    const cMaterial = document.createElement("material");
+    cMaterial.setAttribute("emissiveColor", "0 0 1"); 
+    cAppearance.appendChild(cMaterial);
+    cometShape.appendChild(cAppearance);
 
-//     // Create <indexedLineSet> element to hold the orbit line
-//     const cIndexedLineSet = document.createElement("indexedLineSet");
+    // Create <indexedLineSet> element to hold the orbit line
+    const cIndexedLineSet = document.createElement("indexedLineSet");
 
-//     // Add coordIndex (this just connects the points in a sequential manner)
-//     let coordIndex = Array.from({length: cOrbitPoints.length}, (_, i) => i).join(' ') + " -1"; // "-1" ends the sequence
-//     cIndexedLineSet.setAttribute("coordIndex", coordIndex);
+    // Add coordIndex (this just connects the points in a sequential manner)
+    let coordIndex = Array.from({length: cOrbitPoints.length}, (_, i) => i).join(' ') + " -1"; // "-1" ends the sequence
+    cIndexedLineSet.setAttribute("coordIndex", coordIndex);
 
-//     // Create <coordinate> element and add calculated points
-//     const cCoordinate = document.createElement("coordinate");
-//     cCoordinate.setAttribute("point", cOrbitPoints.join(', ')); // Insert points as "x y z, x y z, ..."
-//     cIndexedLineSet.appendChild(cCoordinate);
+    // Create <coordinate> element and add calculated points
+    const cCoordinate = document.createElement("coordinate");
+    cCoordinate.setAttribute("point", cOrbitPoints.join(', ')); // Insert points as "x y z, x y z, ..."
+    cIndexedLineSet.appendChild(cCoordinate);
 
-//     // Append the indexedLineSet to the shape
-//     cometShape.appendChild(cIndexedLineSet);
+    // Append the indexedLineSet to the shape
+    cometShape.appendChild(cIndexedLineSet);
 
-//     // Finally, append the shape to the orbitContainer in the x3dom scene
-//     cometOrbitContainer.appendChild(cometShape);
-// }
+    // Finally, append the shape to the orbitContainer in the x3dom scene
+    cometOrbitContainer.appendChild(cometShape);
+}
 
 // Function to process the JSON data
 function processCometData(cometData) {
@@ -111,7 +111,7 @@ function processCometData(cometData) {
         let semiMajorAxis = calculateSemiMajorAxis(eccentricity, perihelionDistance);
         const cOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
 
-        createOrbitShape(cOrbitPoints, objectName);
+        createCometeOrbitShape(cOrbitPoints, objectName);
 
     });
 }
