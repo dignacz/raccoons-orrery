@@ -55,13 +55,17 @@ function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, n
 }
 
 // 2. Function to create and append orbit to x3dom scene
-function createAsteroidOrbitShape(orbitPoints, objectName) {
+function createAsteroidOrbitShape(orbitPoints, objectName, pha = "N") {
     const asteroidOrbitContainer = document.getElementById("asteroidOrbitContainer");
     const asteroidShape = document.createElement("shape");
 
     const aAppearance = document.createElement("appearance");
     const aMaterial = document.createElement("material");
-    aMaterial.setAttribute("emissiveColor", "1 0 0"); // Red color for asteroid orbits
+    if (pha === "Y") {
+        aMaterial.setAttribute("emissiveColor", "1 0 0"); // Red color for potentially hazardous asteroids
+    } else {
+        aMaterial.setAttribute("emissiveColor", "0.30 0.30 0.30"); // Black color for non-hazardous asteroids
+    }
     aAppearance.appendChild(aMaterial);
     asteroidShape.appendChild(aAppearance);
 
@@ -83,14 +87,15 @@ function processAsteroidData(asteroidData) {
    
      asteroidData.forEach(obj => {
         const eccentricity = parseFloat(obj.e);
-        const perihelionDistance = parseFloat(obj.q);
+        // const perihelionDistance = parseFloat(obj.q);
         const semiMajorAxis = parseFloat(obj.a);
         const inclination = parseFloat(obj.i);
         const omega = parseFloat(obj.w);
         const node = parseFloat(obj.om);
+        const PHA = obj.pha;
 
         // Here you'd calculate the orbit points and plot them, like in the previous example
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
-        createAsteroidOrbitShape(aOrbitPoints, obj.full_name); // Plot the orbit in X3D
+        createAsteroidOrbitShape(aOrbitPoints, obj.full_name, PHA); // Plot the orbit in X3D
     });
 }
