@@ -7,7 +7,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: black;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,7 +16,7 @@ body {
 
 /* Window Container */
 .app-window {
-    background-color: white;
+    background-color: black;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     border: 2px solid #333;
@@ -38,7 +38,7 @@ body {
 .app-content {
     flex: 1;
     padding: 20px;
-    background-color: #ecf0f1;
+    background-color: black;
     overflow: auto;
 }
 
