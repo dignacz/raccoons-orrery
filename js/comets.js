@@ -6,9 +6,9 @@ fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
     }
     return response.json();  // Parse the JSON data from the response
 })
-    .then(data => {
-        console.log(data);  // Now you have access to the JSON data
-        processPlanetaryData(data);
+    .then(cometData => {
+        console.log(cometData);  // Now you have access to the JSON data
+        processCometData(cometData);
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -62,43 +62,43 @@ function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, n
     return points;
 }
 
-// Function to create and append orbit to x3dom scene
-function createOrbitShape(orbitPoints, objectName) {
-    const orbitContainer = document.getElementById("orbitContainer");
+// // 3. Function to create and append orbit to x3dom scene
+// function createOrbitShape(cOrbitPoints, objectName) {
+//     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
 
-    // Create <shape> element for the orbit
-    const shape = document.createElement("shape");
+//     // Create <shape> element for the orbit
+//     const cometShape = document.createElement("shape");
 
-    // Set appearance (e.g., line color)
-    const appearance = document.createElement("appearance");
-    const material = document.createElement("material");
-    material.setAttribute("emissiveColor", "0 0 1"); // Blue color
-    appearance.appendChild(material);
-    shape.appendChild(appearance);
+//     // Set appearance (e.g., line color)
+//     const cAppearance = document.createElement("appearance");
+//     const cMaterial = document.createElement("material");
+//     cMaterial.setAttribute("emissiveColor", "1 0 0"); 
+//     cAppearance.appendChild(cMaterial);
+//     cometShape.appendChild(cAppearance);
 
-    // Create <indexedLineSet> element to hold the orbit line
-    const indexedLineSet = document.createElement("indexedLineSet");
+//     // Create <indexedLineSet> element to hold the orbit line
+//     const cIndexedLineSet = document.createElement("indexedLineSet");
 
-    // Add coordIndex (this just connects the points in a sequential manner)
-    let coordIndex = Array.from({length: orbitPoints.length}, (_, i) => i).join(' ') + " -1"; // "-1" ends the sequence
-    indexedLineSet.setAttribute("coordIndex", coordIndex);
+//     // Add coordIndex (this just connects the points in a sequential manner)
+//     let coordIndex = Array.from({length: cOrbitPoints.length}, (_, i) => i).join(' ') + " -1"; // "-1" ends the sequence
+//     cIndexedLineSet.setAttribute("coordIndex", coordIndex);
 
-    // Create <coordinate> element and add calculated points
-    const coordinate = document.createElement("coordinate");
-    coordinate.setAttribute("point", orbitPoints.join(', ')); // Insert points as "x y z, x y z, ..."
-    indexedLineSet.appendChild(coordinate);
+//     // Create <coordinate> element and add calculated points
+//     const cCoordinate = document.createElement("coordinate");
+//     cCoordinate.setAttribute("point", cOrbitPoints.join(', ')); // Insert points as "x y z, x y z, ..."
+//     cIndexedLineSet.appendChild(cCoordinate);
 
-    // Append the indexedLineSet to the shape
-    shape.appendChild(indexedLineSet);
+//     // Append the indexedLineSet to the shape
+//     cometShape.appendChild(cIndexedLineSet);
 
-    // Finally, append the shape to the orbitContainer in the x3dom scene
-    orbitContainer.appendChild(shape);
-}
+//     // Finally, append the shape to the orbitContainer in the x3dom scene
+//     cometOrbitContainer.appendChild(cometShape);
+// }
 
 // Function to process the JSON data
-function processPlanetaryData(data) {
+function processCometData(cometData) {
 
-    data.forEach(obj => {
+    cometData.forEach(obj => {
         // Parse eccentricity and perihelion distance as floating-point numbers
         let eccentricity = parseFloat(obj.e);
         let perihelionDistance = parseFloat(obj.q_au_1);
@@ -109,9 +109,9 @@ function processPlanetaryData(data) {
 
         // Calculate semi-major axis for each object
         let semiMajorAxis = calculateSemiMajorAxis(eccentricity, perihelionDistance);
-        const orbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
+        const cOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
 
-        createOrbitShape(orbitPoints, objectName);
+        createOrbitShape(cOrbitPoints, objectName);
 
     });
 }

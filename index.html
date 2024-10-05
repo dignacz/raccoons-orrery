@@ -6,8 +6,11 @@
     <title>Raccoons to the Moon - Orrery</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link> 
-    <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script> 
-    <script src="js/table.js"></script>
+    <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script>
+    <script src="js/comets.js"></script> 
+    <script src="js/asteroids.js"></script>
+    <script src="js/orbit_to_x3dom.js"></script>
+    <!-- <script src="js/table.js"></script> -->
 </head>
 <body>
 
@@ -26,14 +29,14 @@
                         <appearance>
                             <material diffuseColor="1 1 0"></material> <!-- Yellow for the Sun -->
                         </appearance>
-                        <sphere radius="0.1"></sphere> <!-- Sun at center -->
+                        <sphere radius="0.05"></sphere> <!-- Sun at center -->
                     </shape>
             
                     <!-- Placeholder for multiple orbits -->
-                    <transform id="orbitContainer">
-                        <!-- Orbit lines will be dynamically inserted here -->
-                    </transform>
+                    <group id="cometOrbitContainer"></group>
+                    <group id="asteroidOrbitContainer"></group>
                 </scene>
+                
             </x3d> 
         </div>
 
@@ -49,6 +52,6 @@
             </tbody>
         </table>
     </div> -->
-    <script src="js/orbit.js"></script>
+    
 </body>
 </html>
