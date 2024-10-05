@@ -1,3 +1,4 @@
+
 // Fetch the JSON data from the external file
 fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main/asteroid_query_results.json')
 .then(response => {
@@ -54,9 +55,68 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
     return `${x} ${y} ${z}`;
 }
 
-// Function to create and append orbit and position marker to x3dom scene
+// Function to animate the ball along the asteroid orbit points
+function animateAsteroidBall(orbitPoints) {
+    let pointIndex = 0;
+
+    function moveBall() {
+        if (pointIndex >= orbitPoints.length) {
+            pointIndex = 0; // Loop back to start
+        }
+        const ballTransform = document.getElementById('asteroidOrbitBall');
+        if (ballTransform) {
+            ballTransform.setAttribute('translation', orbitPoints[pointIndex]);
+        } else {
+            console.error("Asteroid ball transform not found");
+        }
+        pointIndex++;
+
+        requestAnimationFrame(moveBall);
+    }
+    moveBall();
+}
+
+// Function to add a ball to the asteroid's orbit
+function addBallToAsteroidOrbit(orbitPoints) {
+    const scene = document.querySelector('scene');
+    if (!scene) {
+        console.error("Scene not found");
+        return;
+    }
+
+    const ballTransform = document.createElement('transform');
+    ballTransform.setAttribute('id', 'asteroidOrbitBall');
+
+    const ballShape = document.createElement('shape');
+    const ballAppearance = document.createElement('appearance');
+    const ballMaterial = document.createElement('material');
+    ballMaterial.setAttribute('diffuseColor', '0 1 0'); // Green color for the ball
+    ballAppearance.appendChild(ballMaterial);
+    ballShape.appendChild(ballAppearance);
+
+    const ballSphere = document.createElement('sphere');
+    ballSphere.setAttribute('radius', '0.05'); // Small sphere for the asteroid ball
+    ballShape.appendChild(ballSphere);
+
+    ballTransform.appendChild(ballShape);
+    scene.appendChild(ballTransform);
+
+    animateAsteroidBall(orbitPoints);
+}
+
+
 function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha = "N") {
-    const asteroidOrbitContainer = document.getElementById("asteroidOrbitContainer");
+    let asteroidContainerPHA;
+    let asteroidContainerNonPHA;
+
+    if (pha === "Y") {
+        asteroidContainerPHA = document.getElementById("asteroidOrbitContainerPHA");
+        asteroidContainerPHA.setAttribute('visible', 'false'); // Ensure it's visible by default
+    } else {
+        asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
+        asteroidContainerNonPHA.setAttribute('visible', 'false'); // Ensure it's visible by default
+    }
+
     const asteroidShape = document.createElement("shape");
 
     const aAppearance = document.createElement("appearance");
@@ -64,7 +124,7 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha 
     if (pha === "Y") {
         aMaterial.setAttribute("emissiveColor", "1 0 0"); // Red color for potentially hazardous asteroids
     } else {
-        aMaterial.setAttribute("emissiveColor", "0.30 0.30 0.30"); // Light gray color for non-hazardous asteroids
+        aMaterial.setAttribute("emissiveColor", "0.30 0.30 0.30"); // Grey color for non-hazardous asteroids
     }
     aAppearance.appendChild(aMaterial);
     asteroidShape.appendChild(aAppearance);
@@ -78,7 +138,12 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha 
     aIndexedLineSet.appendChild(aCoordinate);
 
     asteroidShape.appendChild(aIndexedLineSet);
-    asteroidOrbitContainer.appendChild(asteroidShape);
+    if (pha === "Y") {
+        asteroidContainerPHA.appendChild(asteroidShape);
+    }
+    else {
+        asteroidContainerNonPHA.appendChild(asteroidShape);
+    }
 
     // Create a sphere to mark the current position of the asteroid
     const currentShape = document.createElement("shape");
@@ -94,10 +159,15 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectName, pha 
     currentSphere.setAttribute("radius", "0.008");
     currentShape.appendChild(currentSphere);
     currentTransform.appendChild(currentShape);
-    asteroidOrbitContainer.appendChild(currentTransform);
+    if (pha === "Y") {
+        asteroidContainerPHA.appendChild(currentTransform);
+    }
+    else {
+        asteroidContainerNonPHA.appendChild(currentTransform);
+    }
 }
 
-// Function to process the JSON data
+// 3. Update processAsteroidData to add the ball
 function processAsteroidData(asteroidData) {
     asteroidData.forEach(obj => {
         const eccentricity = parseFloat(obj.e);
@@ -114,5 +184,10 @@ function processAsteroidData(asteroidData) {
 
         // Plot the orbit and the current position in X3D
         createAsteroidOrbitShape(aOrbitPoints, currentPosition, obj.full_name, PHA);
+
+        // Add the ball to the first asteroid orbit (as an example)
+        if (obj.full_name === asteroidData[0].full_name) {
+            addBallToAsteroidOrbit(aOrbitPoints);
+        }
     });
 }

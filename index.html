@@ -9,29 +9,80 @@
     <script type='text/javascript' src="https://www.x3dom.org/download/x3dom.js"></script>
     <script src="js/comets.js"></script>
     <script src="js/asteroids.js"></script>
+    <script src="js/toggleOrbits.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: black;
+            color: white;
+        }
+        .app-window {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .app-window-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            width: 100%;
+            font-weight: bold;
+        }
+        .app-content {
+            flex: 1;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        x3d {
+            width: 100%;
+            height: 100%;
+        }
+        .toggle-buttons {
+            margin-top: 10px;
+        }
+        .toggle-buttons button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 1em;
+        }
+    </style>
 </head>
 <body>
     <div class="app-window">
         <div class="app-window-header">
             Raccoon Orrery
+            <!-- Add buttons to toggle asteroid and comet orbits -->
+            <div class="toggle-buttons">
+                <button id="toggleAsteroidsPHA">Toggle Asteroids (PHA Y)</button>
+                <button id="toggleAsteroidsNonPHA">Toggle Asteroids (PHA N)</button>
+                <button id="toggleComets">Toggle Comets</button>
+            </div>
         </div>
         <div class="app-content">
-            <x3d width='800px' height='600px'>
+            <x3d>
                 <scene>
-                    <!-- Add a stronger directional light -->
                     <directionalLight intensity="1.2" direction='-1 -1 -1'></directionalLight>
-                    <!-- Add an ambient light to make the entire scene brighter -->
                     <pointLight intensity="0.8" location="2 2 2"></pointLight>
-                    <!-- Add a sphere for the central object (e.g., Sun) with an emissive material -->
                     <shape>
                         <appearance>
-                            
+                            <material emissiveColor="1 1 0"></material>
                         </appearance>
-                        <sphere radius="0.05"></sphere> <!-- Sun at center -->
+                        <sphere radius="0.05"></sphere>
                     </shape>
-                    <!-- Placeholder for multiple orbits -->
+                    <!-- Containers for orbits -->
                     <group id="cometOrbitContainer"></group>
-                    <group id="asteroidOrbitContainer"></group>
+                    <group id="asteroidOrbitContainerPHA"></group>
+                    <group id="asteroidOrbitContainerNonPHA"></group>
                 </scene>
             </x3d>
         </div>

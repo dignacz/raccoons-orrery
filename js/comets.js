@@ -1,11 +1,11 @@
 // Fetch the JSON data from the external file
 fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
-.then(response => {
-    if (!response.ok) {
-        throw new Error('Network response was not ok ' + response.statusText);
-    }
-    return response.json();  // Parse the JSON data from the response
-})
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();  // Parse the JSON data from the response
+    })
     .then(cometData => {
         console.log(cometData);  // Now you have access to the JSON data
         processCometData(cometData);
@@ -41,26 +41,20 @@ function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, n
 
     // Loop to calculate points along the orbit
     for (let i = 0; i < numPoints; i++) {
-        // True anomaly from 0 to 2π (0 to 360 degrees)
         let trueAnomaly = (2 * Math.PI * i) / numPoints;
-
-        // Radius at this point in the orbit
         let r = (semiMajorAxis * (1 - Math.pow(eccentricity, 2))) / (1 + eccentricity * Math.cos(trueAnomaly));
 
-        // Position in the orbital plane (2D)
         let xPrime = r * Math.cos(trueAnomaly);
         let yPrime = r * Math.sin(trueAnomaly);
 
-        // Transform to 3D space using inclination, omega, and node
         let x = xPrime * (Math.cos(nodeRad) * Math.cos(omegaRad) - Math.sin(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad))
                 - yPrime * (Math.sin(nodeRad) * Math.cos(omegaRad) + Math.cos(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad));
 
         let y = xPrime * (Math.sin(nodeRad) * Math.cos(omegaRad) + Math.cos(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad))
                 + yPrime * (Math.cos(nodeRad) * Math.cos(omegaRad) - Math.sin(nodeRad) * Math.sin(omegaRad) * Math.cos(inclinationRad));
 
-        let z = xPrime * (Math.sin(omegaRad) * Math.sin(inclinationRad)) + yPrime * (Math.cos(omegaRad) * Math.sin(inclinationRad));
+        let z = xPrime * Math.sin(omegaRad) * Math.sin(inclinationRad) + yPrime * Math.cos(omegaRad) * Math.sin(inclinationRad);
 
-        // Store the calculated (x, y, z) point
         points.push(`${x} ${y} ${z}`);
     }
 
@@ -96,32 +90,27 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
 }
 
 // 4. Function to create and append comet orbit and position marker to x3dom scene
-function createCometOrbitShape(cOrbitPoints, currentPosition, objectName) {
+function createCometeOrbitShape(cOrbitPoints, currentPosition, objectName) {
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
+    cometOrbitContainer.setAttribute('visible', 'false'); // Ensure it's visible by default
 
-    // Create <shape> element for the orbit
     const cometShape = document.createElement("shape");
-
-    // Set appearance (e.g., line color)
     const cAppearance = document.createElement("appearance");
     const cMaterial = document.createElement("material");
     cMaterial.setAttribute("emissiveColor", "0 0 0.1"); // Light blue color for comets
     cAppearance.appendChild(cMaterial);
     cometShape.appendChild(cAppearance);
 
-    // Create <indexedLineSet> element to hold the orbit line
     const cIndexedLineSet = document.createElement("indexedLineSet");
 
     // Add coordIndex (this just connects the points in a sequential manner)
     let coordIndex = Array.from({ length: cOrbitPoints.length }, (_, i) => i).join(' ') + " -1"; // "-1" ends the sequence
     cIndexedLineSet.setAttribute("coordIndex", coordIndex);
 
-    // Create <coordinate> element and add calculated points
     const cCoordinate = document.createElement("coordinate");
     cCoordinate.setAttribute("point", cOrbitPoints.join(' '));
     cIndexedLineSet.appendChild(cCoordinate);
 
-    // Append the indexedLineSet to the shape
     cometShape.appendChild(cIndexedLineSet);
     cometOrbitContainer.appendChild(cometShape);
 
@@ -142,10 +131,58 @@ function createCometOrbitShape(cOrbitPoints, currentPosition, objectName) {
     cometOrbitContainer.appendChild(currentTransform);
 }
 
-// Function to process the JSON data
+// 4. Function to create and append the ball to the comet's orbit
+function addBallToCometOrbit(orbitPoints) {
+    const scene = document.querySelector('scene');
+    if (!scene) {
+        console.error("Scene not found");
+        return;
+    }
+
+    const ballTransform = document.createElement('transform');
+    ballTransform.setAttribute('id', 'cometOrbitBall');
+
+    const ballShape = document.createElement('shape');
+    const ballAppearance = document.createElement('appearance');
+    const ballMaterial = document.createElement('material');
+    ballMaterial.setAttribute('diffuseColor', '1 0 0'); // Yellow color for the ball
+    ballAppearance.appendChild(ballMaterial);
+    ballShape.appendChild(ballAppearance);
+
+    const ballSphere = document.createElement('sphere');
+    ballSphere.setAttribute('radius', '0.1'); // Small sphere for the comet ball
+    ballShape.appendChild(ballSphere);
+
+    ballTransform.appendChild(ballShape);
+    scene.appendChild(ballTransform);
+
+    animateCometBall(orbitPoints);
+}
+
+// 5. Function to animate the ball along the comet orbit points
+function animateCometBall(orbitPoints) {
+    let pointIndex = 0;
+
+    function moveBall() {
+        if (pointIndex >= orbitPoints.length) {
+            pointIndex = 0; // Loop back to start
+        }
+        const ballTransform = document.getElementById('cometOrbitBall');
+        if (ballTransform) {
+            ballTransform.setAttribute('translation', orbitPoints[pointIndex]);
+        } else {
+            console.error("Ball transform not found");
+        }
+        pointIndex++;
+
+        requestAnimationFrame(moveBall);
+    }
+    moveBall();
+}
+
+// 6. Function to process the JSON data
 function processCometData(cometData) {
     cometData.forEach(obj => {
-        // Parse eccentricity and perihelion distance as floating-point numbers
         let eccentricity = parseFloat(obj.e);
         let perihelionDistance = parseFloat(obj.q_au_1);
         let inclination = parseFloat(obj.i_deg);
@@ -160,6 +197,10 @@ function processCometData(cometData) {
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
 
         // Plot the orbit and the current position in X3D
-        createCometOrbitShape(cOrbitPoints, currentPosition, objectName);
+        createCometeOrbitShape(cOrbitPoints, currentPosition, objectName);
+
+        if (objectName === cometData[0].object_name) {
+            addBallToCometOrbit(cOrbitPoints);
+        }
     });
 }
