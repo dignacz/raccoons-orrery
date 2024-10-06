@@ -35,6 +35,21 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
     .catch(error => console.error('Error loading the JSON file:', error));
 
 // PlanetData
+fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/good-morning-pineapple/planets_data.json')
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
+    }
+    return response.json();  // Parse the JSON data from the response
+})
+.then(planetData => {
+    console.log(planetData);  // Now you have access to the JSON data
+    window.planetData = planetData; // Store comet data globally for click access
+    // displayData(asteroidData);
+    //processAsteroidData(asteroidData);
+})
+.catch(error => console.error('Error loading the JSON file:', error));
+
 
 // SLIDER
 let sliderValue = 0; // Declare a global variable
