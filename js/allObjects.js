@@ -45,8 +45,7 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/good
 .then(planetData => {
     console.log(planetData);  // Now you have access to the JSON data
     window.planetData = planetData; // Store comet data globally for click access
-    // displayData(asteroidData);
-    //processAsteroidData(asteroidData);
+    //processPlanetData(planetData);
 })
 .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -104,6 +103,19 @@ function calculateSemiMajorAxis(e, q) {
     }
     return q / (1 - e);  // Semi-major axis formula
 }
+
+// Eccentricity RAD to DEG (PLANETS ONLY)
+
+function convertEccentricityRadToDeg(eccentricityRad) {
+    const degrees = eccentricityRad * (180 / Math.PI);
+    return degrees;
+  }
+
+// Argument of Perihelion (PLANETS ONLY)
+  function calculateArgumentOfPerihelion(perihelionLongitudeDeg, ascendingNodeLongitudeDeg) {
+    const argumentOfPerihelion = perihelionLongitudeDeg - ascendingNodeLongitudeDeg;
+    return argumentOfPerihelion;
+  }
 
 // 2. Function to calculate the orbit points
 function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node, numPoints = 100) {
@@ -332,6 +344,34 @@ function processAsteroidData(asteroidData) {
         const tp = parseFloat(obj.tp);
         const PHA = obj.pha; // Corrected to retrieve PHA as a string
         const objectId = obj.full_name;
+
+        // Calculate the orbit points and current position
+        const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
+        const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
+
+        // Check if comet already exists and clear previous position
+        const existingAsteroid = document.getElementById(objectId);
+        if (existingAsteroid) {
+            existingAsteroid.remove();
+        }
+
+        // Plot the orbit and the current position in X3D
+        createAsteroidOrbitShape(aOrbitPoints, currentPosition, objectId, PHA);
+        
+    });
+}
+
+// Process Asteroid Data
+function processPlanetData(planetData) {
+    asteroidData.forEach(obj => {
+        const eccentricity = convertEccentricityRadToDeg(parseFloat(obj.e_rad));
+        const semiMajorAxis = parseFloat(obj.a_au);
+        const inclination = parseFloat(obj.I_deg);
+        const longperi = parseFloat(obj.long_peri_deg);
+        const node = parseFloat(obj.long_node_deg);
+        const omega = calculateArgumentOfPerihelion(longperi, node);
+        const tp = parseFloat(obj.tp_julian);
+        const objectId = obj.name;
 
         // Calculate the orbit points and current position
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);

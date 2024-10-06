@@ -6,7 +6,8 @@
       "I_deg": 7.00497902,
       "L_deg": 252.2503235,
       "long_peri_deg": 77.45779628,
-      "long_node_deg": 48.33076593
+      "long_node_deg": 48.33076593,
+      "tp_julian": 2451968.4
     },
     {
       "name": "Venus",
@@ -15,16 +16,18 @@
       "I_deg": 3.39467605,
       "L_deg": 181.9790995,
       "long_peri_deg": 131.60246718,
-      "long_node_deg": 76.67984255
+      "long_node_deg": 76.67984255,
+      "tp_julian": 2453427.03
     },
     {
-      "name": "Earth/Moon Barycenter",
+      "name": "EM Bary",
       "a_au": 1.00000261,
       "e_rad": 0.01671123,
       "I_deg": -0.00001531,
       "L_deg": 100.46457166,
       "long_peri_deg": 102.93768193,
-      "long_node_deg": 0.0
+      "long_node_deg": 0.0,
+      "tp_julian": 2451454.68
     },
     {
       "name": "Mars",
@@ -33,7 +36,8 @@
       "I_deg": 1.84969142,
       "L_deg": -4.55343205,
       "long_peri_deg": -23.94362959,
-      "long_node_deg": 49.55953891
+      "long_node_deg": 49.55953891,
+      "tp_julian": 2452814.33
     },
     {
       "name": "Jupiter",
@@ -42,7 +46,8 @@
       "I_deg": 1.30439695,
       "L_deg": 34.39644051,
       "long_peri_deg": 14.72847983,
-      "long_node_deg": 100.47390909
+      "long_node_deg": 100.47390909,
+      "tp_julian": 2468344.89
     },
     {
       "name": "Saturn",
@@ -51,7 +56,8 @@
       "I_deg": 2.48599187,
       "L_deg": 49.95424423,
       "long_peri_deg": 92.59887831,
-      "long_node_deg": 113.66242448
+      "long_node_deg": 113.66242448,
+      "tp_julian": 2438419.18
     },
     {
       "name": "Uranus",
@@ -60,7 +66,8 @@
       "I_deg": 0.77263783,
       "L_deg": 313.23810451,
       "long_peri_deg": 170.9542763,
-      "long_node_deg": 74.01692503
+      "long_node_deg": 74.01692503,
+      "tp_julian": 2463671.04
     },
     {
       "name": "Neptune",
@@ -69,7 +76,8 @@
       "I_deg": 1.77004347,
       "L_deg": -55.12002969,
       "long_peri_deg": 44.96476227,
-      "long_node_deg": 131.78422574
+      "long_node_deg": 131.78422574,
+      "tp_julian": 2427481.24
     }
   ]
-  
+    
