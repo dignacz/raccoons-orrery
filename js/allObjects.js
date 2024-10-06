@@ -43,8 +43,8 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/good
 })
 .then(planetData => {
     console.log(planetData);  // Now you have access to the JSON data
-    window.planetData = planetData; // Store comet data globally for click access
-    processPlanetData(planetData);
+    initializeGlobalData('planetData', planetData, processPlanetData);
+    renderPlanets();
 })
 .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -533,6 +533,15 @@ function renderAsteroids() {
 
 function renderComets() {
   window.cometDataProcessed.forEach(obj => {
+    if (!obj.rendered && !obj.hidden) {
+      createCometeOrbitShape(obj.cOrbitPoints, obj.currentPosition, obj.objectId, obj.semiMajorAxis);
+      obj.rendered = true;
+    }
+  })
+}
+
+function renderPlanets() {
+  window.planetDataProcessed.forEach(obj => {
     if (!obj.rendered && !obj.hidden) {
       createCometeOrbitShape(obj.cOrbitPoints, obj.currentPosition, obj.objectId, obj.semiMajorAxis);
       obj.rendered = true;
