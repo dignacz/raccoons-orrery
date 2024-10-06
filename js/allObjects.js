@@ -274,31 +274,71 @@ function removeElementsBySunProximity(shape, sunDistanceRangeSliderValue) {
   }
 }
 
-function removeObjectsBySunProximity(event) {
-  const sunDistanceRangeSliderValue = event.data.value;
-  window.cometDataProcessed.forEach(obj => updateDataBySunProximity(obj, sunDistanceRangeSliderValue));
-  window.asteroidDataProcessed.forEach(obj => updateDataBySunProximity(obj, sunDistanceRangeSliderValue));
+function removeObjectsBySunProximity(distance) {
+  window.cometDataProcessed.forEach(obj => updateDataBySunProximity(obj, distance));
+  window.asteroidDataProcessed.forEach(obj => updateDataBySunProximity(obj, distance));
 
   // Delete comet elements exceeding the distance
   document.querySelectorAll("#cometOrbitContainer shape").forEach(
-    shape => removeElementsBySunProximity(shape, sunDistanceRangeSliderValue)
+    shape => removeElementsBySunProximity(shape, distance)
   );
 
   // Delete asteroid elements exceeding the distance
   document.querySelectorAll("#asteroidOrbitContainerPHA shape, #asteroidOrbitContainerNonPHA shape").forEach(
-    shape => removeElementsBySunProximity(shape, sunDistanceRangeSliderValue)
+    shape => removeElementsBySunProximity(shape, distance)
   );
 
 }
 
 // read message and hide elements exceeding the value
 window.addEventListener("message", function(event) {
-  if (event.data.type === "sunDistanceRangeSlider") {
-    removeObjectsBySunProximity(event);
-    renderAsteroids();
-    renderComets();
+  const { type, value } = event.data;
+  switch (type) {
+    case "sunDistanceRangeSlider":
+      handleSunDistanceRangeSlider(value);
+      break;
+
+    case "toggleOrbits":
+      handleToggleOrbits(value);
+      break;
+    
+    default:
+      alert("Invalid message type");
   }
 });
+
+
+function handleSunDistanceRangeSlider(value) {
+  removeObjectsBySunProximity(value);
+  renderAsteroids()
+  renderComets();
+}
+
+function handleToggleOrbits(value) {
+  const { containerId, isOn } = value;
+  
+  function toggleOrbits(obj) {
+    return obj.hidden = !isOn; 
+  }
+  
+  switch (containerId) {
+    case "asteroidOrbitContainerPHA":
+      window.asteroidDataProcessed.forEach(toggleOrbits);
+      renderAsteroids();
+      break;
+
+    case "asteroidOrbitContainerNonPHA":
+      window.asteroidDataProcessed.forEach(toggleOrbits);
+      renderAsteroids();
+      break;
+
+    case "cometOrbitContainer":
+      window.cometDataProcessed.forEach(toggleOrbits);
+      renderComets();
+      break;
+  }
+}
+
 
 // Process Asteroid Data
 function processAsteroidData(data) {
