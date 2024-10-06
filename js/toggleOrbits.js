@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    function isOn(element) {
+    function getIsOn(element) {
       return element.getAttribute('visible') === 'false';
     }
     function turnOn(label) {
@@ -15,9 +15,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         toggleButton.addEventListener('click', function(e) {
             const container = document.getElementById(containerId);
+            const isOn = getIsOn(container);
 
             // Change label
-            e.target.textContent = isOn(container) ? turnOn(label) : turnOff(label);
+            e.target.textContent = isOn ? turnOn(label) : turnOff(label);
+            
+            window.postMessage({ type: 'toggleOrbits', value: { containerId, isOn } }, '*');
 
             if (container) {
                 const isHidden = container.getAttribute('visible') === 'false';
