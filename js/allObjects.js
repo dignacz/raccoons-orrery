@@ -235,16 +235,11 @@ function createCometeOrbitShape(obj) {
 }
 
 function createAsteroidOrbitShape(obj) {
-    const {aOrbitPoints, currentPosition, objectId, pha = "N", semiMajorAxis} = obj;
+    const {aOrbitPoints, currentPosition, objectId, pha = "N"} = obj;
 
-    let asteroidContainerPHA;
-    let asteroidContainerNonPHA;
-
-    if (pha === "Y") {
-        asteroidContainerPHA = document.getElementById("asteroidOrbitContainerPHA");
-    } else {
-        asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
-    }
+    const asteroidContainer = pha === "Y"
+     ? document.getElementById("asteroidOrbitContainerPHA")
+     : document.getElementById("asteroidOrbitContainerNonPHA");
 
     const aAppearance = document.createElement("appearance");
     const aMaterial = document.createElement("material");
@@ -268,12 +263,8 @@ function createAsteroidOrbitShape(obj) {
     aIndexedLineSet.appendChild(aCoordinate);
 
     obj.orbitElement.appendChild(aIndexedLineSet);
-    if (pha === "Y") {
-        asteroidContainerPHA.appendChild(obj.orbitElement);
-    }
-    else {
-        asteroidContainerNonPHA.appendChild(obj.orbitElement);
-    }
+
+    asteroidContainer.appendChild(obj.orbitElement);
 
     // Create a sphere to mark the current position of the asteroid
     const currentShape = document.createElement("shape");
@@ -283,21 +274,13 @@ function createAsteroidOrbitShape(obj) {
     currentAppearance.appendChild(currentMaterial);
     currentShape.appendChild(currentAppearance);
 
-    // add semiMajorAxis as metadata for the distance to be able to filter by it
-    currentShape.setAttribute("data-distance", semiMajorAxis)
-
     obj.sphereElement.setAttribute("translation", currentPosition);
     const currentSphere = document.createElement("sphere");
     currentShape.setAttribute("id", objectId); 
     currentSphere.setAttribute("radius", "0.008");
     currentShape.appendChild(currentSphere);
     obj.sphereElement.appendChild(currentShape);
-    if (pha === "Y") {
-        asteroidContainerPHA.appendChild(obj.sphereElement);
-    }
-    else {
-        asteroidContainerNonPHA.appendChild(obj.sphereElement);
-    }
+    asteroidContainer.appendChild(obj.sphereElement);
 }
 
  function createPlanetOrbitShape({pOrbitPoints, currentPosition, objectId}) {
@@ -379,7 +362,7 @@ window.addEventListener("message", function(event) {
 
 function handleSunDistanceRangeSlider(value) {
   hideObjectsBySunProximity(value);
-  /* renderAsteroids() */
+  renderAsteroids()
   renderComets();
 }
 
@@ -400,7 +383,6 @@ function processAsteroidData(data) {
         const tp = parseFloat(obj.tp);
         const PHA = obj.pha; // Corrected to retrieve PHA as a string
         const objectId = obj.full_name;
-        //console.log(obj);
 
         // Calculate the orbit points and current position
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
@@ -408,10 +390,10 @@ function processAsteroidData(data) {
         //console.log(currentPosition);
 
         // Check if comet already exists and clear previous position
-        const existingAsteroid = document.getElementById(objectId);
-        if (existingAsteroid) {
-            existingAsteroid.remove();
-        }
+        /* const existingAsteroid = document.getElementById(objectId); */
+        /* if (existingAsteroid) { */
+        /*     existingAsteroid.remove(); */
+        /* } */
 
         const orbitElement = document.createElement("shape");
         orbitElement.setAttribute('visible', 'false')
