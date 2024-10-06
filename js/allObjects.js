@@ -239,6 +239,14 @@ function processCometData(cometData) {
     });
 }
 
+// read message and hide elements exceeding the value
+window.addEventListener("message", function(event) {
+    if (event.data.type === "sunDistanceRangeSlider") {
+        const sunDistanceRangeSliderValue = event.data.value;
+        console.log(sunDistanceRangeSliderValue);
+    }
+});
+
 // Process Asteroid Data
 function processAsteroidData(asteroidData) {
     asteroidData.forEach(obj => {
