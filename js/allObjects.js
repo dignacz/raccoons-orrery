@@ -248,23 +248,31 @@ function processCometData(cometData) {
     });
 }
 
+function deleteObjectsBySunProximity(event) {
+  const sunDistanceRangeSliderValue = event.data.value;
+
+  // Delete comet elements exceeding the distance
+  document.querySelectorAll("#cometOrbitContainer shape").forEach(shape => {
+    const distance = parseFloat(shape.getAttribute("data-distance"));
+    if (distance > sunDistanceRangeSliderValue) {
+      shape.remove();
+    }
+  });
+
+  // Delete asteroid elements exceeding the distance
+  document.querySelectorAll("#asteroidOrbitContainerPHA shape, #asteroidOrbitContainerNonPHA shape").forEach(shape => {
+    const distance = parseFloat(shape.getAttribute("data-distance"));
+    if (distance > sunDistanceRangeSliderValue) {
+      shape.remove();
+    }
+  });
+}
+
 // read message and hide elements exceeding the value
 window.addEventListener("message", function(event) {
-    if (event.data.type === "sunDistanceRangeSlider") {
-        const sunDistanceRangeSliderValue = event.data.value;
-        
-        // Hide comet elements exceeding the distance
-        document.querySelectorAll("#cometOrbitContainer shape").forEach(shape => {
-            const distance = parseFloat(shape.getAttribute("data-distance"));
-            shape.setAttribute('visible', distance <= sunDistanceRangeSliderValue);
-        });
-
-        // Hide asteroid elements exceeding the distance
-        document.querySelectorAll("#asteroidOrbitContainerPHA shape, #asteroidOrbitContainerNonPHA shape").forEach(shape => {
-            const distance = parseFloat(shape.getAttribute("data-distance"));
-            shape.setAttribute('visible', distance <= sunDistanceRangeSliderValue);
-        });
-    }
+  if (event.data.type === "sunDistanceRangeSlider") {
+    deleteObjectsBySunProximity(event);
+  }
 });
 
 // Process Asteroid Data
