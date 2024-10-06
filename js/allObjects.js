@@ -48,6 +48,12 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/good
     return response.json();  // Parse the JSON data from the response
 })
 .then(planetData => {
+  initializeGlobalData( 
+    'planetData',
+    planetData,
+    processPlanetData,
+    createPlanetOrbitShape,
+  )
 })
 .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -283,7 +289,8 @@ function createAsteroidOrbitShape(obj) {
     asteroidContainer.appendChild(obj.sphereElement);
 }
 
- function createPlanetOrbitShape({pOrbitPoints, currentPosition, objectId}) {
+ function createPlanetOrbitShape(obj) {
+    const {pOrbitPoints, currentPosition, objectId} = obj
     const planetOrbitContainer = document.getElementById("planetOrbitContainer");
 
     // Set visibility based on the current state
@@ -294,12 +301,11 @@ function createAsteroidOrbitShape(obj) {
         planetOrbitContainer.setAttribute('visible', 'false');
     }
 
-    const planetShape = document.createElement("shape");
     const pAppearance = document.createElement("appearance");
     const pMaterial = document.createElement("material");
     pMaterial.setAttribute("emissiveColor", "0.75 0.75 0.75"); // Darker color for planets
     pAppearance.appendChild(pMaterial);
-    planetShape.appendChild(pAppearance);
+    obj.orbitElement.appendChild(pAppearance);
 
     const pIndexedLineSet = document.createElement("indexedLineSet");
 
@@ -311,8 +317,8 @@ function createAsteroidOrbitShape(obj) {
     pCoordinate.setAttribute("point", pOrbitPoints.join(' '));
     pIndexedLineSet.appendChild(pCoordinate);
 
-    planetShape.appendChild(pIndexedLineSet);
-    planetOrbitContainer.appendChild(planetShape);
+    obj.orbitElement.appendChild(pIndexedLineSet);
+    planetOrbitContainer.appendChild(obj.orbitElement);
 
     // Create a sphere to mark the current position of the planet
     const currentShape = document.createElement("shape");
@@ -323,13 +329,12 @@ function createAsteroidOrbitShape(obj) {
     currentShape.appendChild(currentAppearance);
     currentShape.setAttribute("id", objectId);
 
-    const currentTransform = document.createElement("transform");
-    currentTransform.setAttribute("translation", currentPosition);
+    obj.sphereElement.setAttribute("translation", currentPosition);
     const currentSphere = document.createElement("sphere");
     currentSphere.setAttribute("radius", "0.02"); // Bigger radius for planets
     currentShape.appendChild(currentSphere);
-    currentTransform.appendChild(currentShape);
-    planetOrbitContainer.appendChild(currentTransform);
+    obj.sphereElement.appendChild(currentShape);
+    planetOrbitContainer.appendChild(obj.sphereElement);
 }
 
 function hideObjectsBySunProximity(distance) {
@@ -339,7 +344,7 @@ function hideObjectsBySunProximity(distance) {
 
   window.cometDataProcessed.forEach(updateDataBySunProximity);
   window.asteroidDataProcessed.forEach(updateDataBySunProximity);
-  /* window.planetDataProcessed.forEach(updateDataBySunProximity); */
+  window.planetDataProcessed.forEach(updateDataBySunProximity);
 }
 
 // read message and hide elements exceeding the value
@@ -364,6 +369,7 @@ function handleSunDistanceRangeSlider(value) {
   hideObjectsBySunProximity(value);
   renderAsteroids()
   renderComets();
+  renderPlanets();
 }
 
 function handleToggleOrbits(value) {
@@ -416,8 +422,8 @@ function processAsteroidData(data) {
 }
 
 // Process Planet Data
-function processPlanetData(planetData) {
-    planetData.forEach(obj => {
+function processPlanetData(data) {
+     return data.map(obj => {
         const eccentricity = parseFloat(obj.e_rad);
         const semiMajorAxis = parseFloat(obj.a_au);
         const inclination = parseFloat(obj.I_deg);
@@ -438,6 +444,20 @@ function processPlanetData(planetData) {
             existingPlanet.remove();
         }
 
+        const orbitElement = document.createElement("shape");
+        orbitElement.setAttribute('visible', 'false')
+        
+        const sphereElement = document.createElement("transform");
+        sphereElement.setAttribute('visible', 'false')
+
+        return {
+          pOrbitPoints,
+          currentPosition,
+          semiMajorAxis,
+          objectId,
+          orbitElement,
+          sphereElement,
+        }
         // Plot the orbit and the current position in X3D
         /* createPlanetOrbitShape(pOrbitPoints, currentPosition, objectId); */
         
@@ -506,5 +526,6 @@ function renderComets() {
 }
 
 function renderPlanets() {
-  /* renderObjects('planetDataProcessed'); */
+  renderObjects('planetDataProcessed');
 }
+
