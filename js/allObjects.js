@@ -74,6 +74,23 @@ function initializeGlobalData(key, data, processFn, createShapeFn) {
 // SLIDER
 let sliderValue = 0; // Declare a global variable
 
+function recalculatePositions(obj) {
+  obj.sphereElement.remove();
+  obj.orbitElement.remove();
+  obj.orbitElement = document.createElement("shape");
+  obj.sphereElement = document.createElement("transform");
+  obj.orbitElement.setAttribute('visible', obj.visible)
+  obj.sphereElement.setAttribute('visible', obj.visible)
+  obj.currentPosition = calculateCurrentPosition(
+    obj.eccentricity,
+    obj.semiMajorAxis,
+    obj.inclination,
+    obj.omega,
+    obj.node,
+    obj.tp
+  );
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     var output = document.getElementById("demo");
     var slider = document.getElementById("date-slider");
@@ -91,10 +108,20 @@ document.addEventListener("DOMContentLoaded", function() {
         output.innerHTML = sliderValue;
         //console.log(sliderValue);
 
-        updateDate();
-        processCometData(cometData);
-        processAsteroidData(asteroidData);
-        processPlanetData(planetData);
+      updateDate();
+
+      window.planetDataProcessed.forEach(obj => {
+        recalculatePositions(obj);
+        createPlanetOrbitShape(obj)
+      })
+      window.asteroidDataProcessed.forEach(obj => {
+        recalculatePositions(obj);
+        createAsteroidOrbitShape(obj)
+      })
+      window.cometDataProcessed.forEach(obj => {
+        recalculatePositions(obj);
+        createCometeOrbitShape(obj)
+      })
     };
 });
 
@@ -243,7 +270,6 @@ function createAsteroidOrbitShape(obj) {
     const asteroidContainerId = PHA === "Y"
       ? "asteroidOrbitContainerPHA"
       : "asteroidOrbitContainerNonPHA";
-  console.log('le asteroidContainerId', asteroidContainerId);
 
     const asteroidContainer = document.getElementById(asteroidContainerId);
 
@@ -408,11 +434,17 @@ function processAsteroidData(data) {
         sphereElement.setAttribute('visible', 'false')
 
         return {
+          eccentricity,
+          semiMajorAxis,
+          inclination,
+          omega,
+          node,
+          tp,
+          //
           aOrbitPoints,
           currentPosition,
           objectId,
           PHA,
-          semiMajorAxis,
           orbitElement,
           sphereElement,
         };
@@ -451,6 +483,13 @@ function processPlanetData(data) {
         sphereElement.setAttribute('visible', 'false')
 
         return {
+          eccentricity,
+          semiMajorAxis,
+          inclination,
+          omega,
+          node,
+          tp,
+          //
           pOrbitPoints,
           currentPosition,
           semiMajorAxis,
@@ -488,10 +527,16 @@ function processCometData(data) {
         sphereElement.setAttribute('visible', 'false')
         
         return {
+          eccentricity,
+          semiMajorAxis,
+          inclination,
+          omega,
+          node,
+          tp,
+          //
           cOrbitPoints,
           currentPosition,
           objectId,
-          semiMajorAxis,
           orbitElement,
           sphereElement
         };
@@ -510,7 +555,6 @@ function processCometData(data) {
 
 function renderObjects(key) {
   window[key].forEach(obj => {
-    console.log('setting visible', obj.visible)
     obj.orbitElement.setAttribute("visible", obj.visible)
     obj.sphereElement.setAttribute("visible", obj.visible)
   })
