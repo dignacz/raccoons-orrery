@@ -20,7 +20,7 @@
       "tp_julian": 2453427.03
     },
     {
-      "name": "EM Bary",
+      "name": "Earth/Moon Barycenter",
       "a_au": 1.00000261,
       "e_rad": 0.01671123,
       "I_deg": -0.00001531,
