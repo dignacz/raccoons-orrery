@@ -12,6 +12,7 @@
     <script src="js/allObjects.js"></script>
     <script src="js/toggleOrbits.js"></script>
     <script src="js/table.js"></script>
+    <script src="js/sunDistanceRangeSlider.js"></script>
     <style>
         html, body {
             height: 100%;
@@ -81,6 +82,12 @@
             <div class="slider">
                 <input type="range" id="date-slider" min="2457023.5" max="2462719.5" value="2458528.9" step="0.1">
                 <p>Current Date: <span id="demo">0</span></p>
+            </div>
+            <div class="slider-container">
+              <div class="value-container">
+                <span id="sunDistanceRangeSliderOutput">0</span>
+              </div>
+              <input type="range" min=0 max=100 value=0 class="slider" id="sunDistanceRangeSlider">
             </div>
         </div>
         <div class="app-content">
