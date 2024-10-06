@@ -184,7 +184,7 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
 }
 
 // 4. Function to create and append comet orbit and position marker to x3dom scene
-function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis) {
+function createCometeOrbitShape({cOrbitPoints, currentPosition, objectId, semiMajorAxis}) {
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
 
     const cometShape = document.createElement("shape");
@@ -228,7 +228,7 @@ function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMaj
     cometOrbitContainer.appendChild(currentTransform);
 }
 
-function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = "N", semiMajorAxis) {
+function createAsteroidOrbitShape({orbitPoints, currentPosition, objectId, pha = "N", semiMajorAxis}) {
     let asteroidContainerPHA;
     let asteroidContainerNonPHA;
 
@@ -297,7 +297,7 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
     }
 }
 
- function createPlanetOrbitShape(pOrbitPoints, currentPosition, objectId) {
+ function createPlanetOrbitShape({pOrbitPoints, currentPosition, objectId}) {
     const planetOrbitContainer = document.getElementById("planetOrbitContainer");
 
     // Set visibility based on the current state
@@ -525,7 +525,7 @@ function processPlanetData(planetData) {
 function renderAsteroids() {
   window.asteroidDataProcessed.forEach(obj => {
     if (!obj.rendered && !obj.hidden) {
-      createAsteroidOrbitShape(obj.aOrbitPoints, obj.currentPosition, obj.objectId, obj.PHA, obj.semiMajorAxis);
+      createAsteroidOrbitShape(obj);
       obj.rendered = true;
     }
   })
@@ -534,7 +534,7 @@ function renderAsteroids() {
 function renderComets() {
   window.cometDataProcessed.forEach(obj => {
     if (!obj.rendered && !obj.hidden) {
-      createCometeOrbitShape(obj.cOrbitPoints, obj.currentPosition, obj.objectId, obj.semiMajorAxis);
+      createCometeOrbitShape(obj);
       obj.rendered = true;
     }
   })
@@ -543,7 +543,7 @@ function renderComets() {
 function renderPlanets() {
   window.planetDataProcessed.forEach(obj => {
     if (!obj.rendered && !obj.hidden) {
-      createCometeOrbitShape(obj.cOrbitPoints, obj.currentPosition, obj.objectId, obj.semiMajorAxis);
+      createPlanetOrbitShape(obj);
       obj.rendered = true;
     }
   })
