@@ -192,7 +192,7 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
 
 // 4. Function to create and append comet orbit and position marker to x3dom scene
 function createCometeOrbitShape(obj) {
-    const {cOrbitPoints, currentPosition, objectId, semiMajorAxis} = obj;
+    const {cOrbitPoints, currentPosition, objectId} = obj;
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
 
     const cAppearance = document.createElement("appearance");
@@ -223,9 +223,6 @@ function createCometeOrbitShape(obj) {
     currentShape.appendChild(currentAppearance);
     currentShape.setAttribute("id", objectId);
 
-    // add semiMajorAxis as metadata for the distance to be able to filter by it
-    currentShape.setAttribute("data-distance", semiMajorAxis)
-
     obj.sphereElement.setAttribute("translation", currentPosition);
     const currentSphere = document.createElement("sphere");
     currentSphere.setAttribute("radius", "0.008");
@@ -235,15 +232,18 @@ function createCometeOrbitShape(obj) {
 }
 
 function createAsteroidOrbitShape(obj) {
-    const {aOrbitPoints, currentPosition, objectId, pha = "N"} = obj;
+    const {aOrbitPoints, currentPosition, objectId, PHA = "N"} = obj;
 
-    const asteroidContainer = pha === "Y"
-     ? document.getElementById("asteroidOrbitContainerPHA")
-     : document.getElementById("asteroidOrbitContainerNonPHA");
+    const asteroidContainerId = PHA === "Y"
+      ? "asteroidOrbitContainerPHA"
+      : "asteroidOrbitContainerNonPHA";
+  console.log('le asteroidContainerId', asteroidContainerId);
+
+    const asteroidContainer = document.getElementById(asteroidContainerId);
 
     const aAppearance = document.createElement("appearance");
     const aMaterial = document.createElement("material");
-    if (pha === "Y") {
+    if (PHA === "Y") {
         aMaterial.setAttribute("emissiveColor", "1 0 0"); // Red color for potentially hazardous asteroids
     } else {
         aMaterial.setAttribute("emissiveColor", "0.15 0.15 0.15"); // Grey color for non-hazardous asteroids

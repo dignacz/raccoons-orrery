@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleButton.addEventListener('click', function(e) {
             const container = document.getElementById(containerId);
             const isOn = getIsOn(container);
-            console.log('le isOn',containerId, isOn);
 
             // Change label
             e.target.textContent = isOn ? turnOn(label) : turnOff(label);
