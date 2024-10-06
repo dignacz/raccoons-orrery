@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function setupToggle(toggleButtonId, containerId, label) {
         const toggleButton = document.getElementById(toggleButtonId);
+
+        const container = document.getElementById(containerId);
+
+        // Set initial state if not already set
+        if (!container.hasAttribute('data-is-hidden')) {
+            container.setAttribute('data-is-hidden', 'true'); // Default hidden
+        }
+
         toggleButton.textContent = turnOff(label);
 
         toggleButton.addEventListener('click', function(e) {
@@ -21,7 +29,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (container) {
                 const isHidden = container.getAttribute('visible') === 'false';
-                container.setAttribute('visible', isHidden ? 'true' : 'false');
+                // Toggle visibility
+            container.setAttribute('visible', isHidden ? 'true' : 'false');
+            container.setAttribute('data-is-hidden', isHidden ? 'false' : 'true');
             }
         });
     }
