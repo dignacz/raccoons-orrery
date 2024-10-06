@@ -8,8 +8,8 @@ fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
     })
     .then(cometData => {
         console.log(cometData); 
-        window.cometData = cometData; // Now you have access to the JSON data
-        processCometData(cometData);
+        initializeData('cometData', cometData);
+        processCometData();
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -28,11 +28,20 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
 })
     .then(asteroidData => {
         console.log(asteroidData);  // Now you have access to the JSON data
-        window.asteroidData = asteroidData; // Store comet data globally for click access
+        initializeData('asteroidData', asteroidData);
         // displayData(asteroidData);
-        processAsteroidData(asteroidData);
+        processAsteroidData();
     })
     .catch(error => console.error('Error loading the JSON file:', error));
+
+function initializeData(key, data) {
+  data.forEach(obj => {
+    obj.rendered = false;
+  })
+
+  window[key] = data;
+}
+
 
 // SLIDER
 
@@ -226,8 +235,8 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
 
 
 // Process Comet Data
-function processCometData(cometData) {
-    cometData.forEach(obj => {
+function processCometData() {
+    window.cometData.forEach(obj => {
         let eccentricity = parseFloat(obj.e);
         let perihelionDistance = parseFloat(obj.q_au_1);
         let inclination = parseFloat(obj.i_deg);
@@ -276,8 +285,8 @@ window.addEventListener("message", function(event) {
 });
 
 // Process Asteroid Data
-function processAsteroidData(asteroidData) {
-    asteroidData.forEach(obj => {
+function processAsteroidData() {
+    window.asteroidData.forEach(obj => {
         const eccentricity = parseFloat(obj.e);
         const semiMajorAxis = parseFloat(obj.a);
         const inclination = parseFloat(obj.i);
