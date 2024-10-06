@@ -108,7 +108,7 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
 }
 
 // 4. Function to create and append comet orbit and position marker to x3dom scene
-function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId) {
+function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis) {
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
     cometOrbitContainer.setAttribute('visible', 'false'); // Ensure it's visible by default
 
@@ -141,6 +141,9 @@ function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId) {
     currentShape.appendChild(currentAppearance);
     currentShape.setAttribute("id", objectId);
 
+    // add semiMajorAxis as metadata for the distance to be able to filter by it
+    currentShape.setAttribute("data-distance", semiMajorAxis)
+
     const currentTransform = document.createElement("transform");
     currentTransform.setAttribute("translation", currentPosition);
     const currentSphere = document.createElement("sphere");
@@ -150,7 +153,7 @@ function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId) {
     cometOrbitContainer.appendChild(currentTransform);
 }
 
-function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = "N") {
+function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = "N", semiMajorAxis) {
     let asteroidContainerPHA;
     let asteroidContainerNonPHA;
 
@@ -175,6 +178,9 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
     asteroidShape.appendChild(aAppearance);
     asteroidShape.setAttribute("id", objectId); 
 
+    // add semiMajorAxis as metadata for the distance to be able to filter by it
+    asteroidShape.setAttribute("data-distance", semiMajorAxis)
+
     const aIndexedLineSet = document.createElement("indexedLineSet");
     let coordIndex = Array.from({ length: orbitPoints.length }, (_, i) => i).join(' ') + " -1";
     aIndexedLineSet.setAttribute("coordIndex", coordIndex);
@@ -198,6 +204,9 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
     currentMaterial.setAttribute("diffuseColor", "0 1 0"); // Green for the current position marker
     currentAppearance.appendChild(currentMaterial);
     currentShape.appendChild(currentAppearance);
+
+    // add semiMajorAxis as metadata for the distance to be able to filter by it
+    currentShape.setAttribute("data-distance", semiMajorAxis)
 
     const currentTransform = document.createElement("transform");
     currentTransform.setAttribute("translation", currentPosition);
@@ -234,7 +243,7 @@ function processCometData(cometData) {
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
 
         // Plot the orbit and the current position in X3D
-        createCometeOrbitShape(cOrbitPoints, currentPosition, objectId);
+        createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis);
 
     });
 }
@@ -243,7 +252,18 @@ function processCometData(cometData) {
 window.addEventListener("message", function(event) {
     if (event.data.type === "sunDistanceRangeSlider") {
         const sunDistanceRangeSliderValue = event.data.value;
-        console.log(sunDistanceRangeSliderValue);
+        
+        // Hide comet elements exceeding the distance
+        document.querySelectorAll("#cometOrbitContainer shape").forEach(shape => {
+            const distance = parseFloat(shape.getAttribute("data-distance"));
+            shape.setAttribute('visible', distance <= sunDistanceRangeSliderValue);
+        });
+
+        // Hide asteroid elements exceeding the distance
+        document.querySelectorAll("#asteroidOrbitContainerPHA shape, #asteroidOrbitContainerNonPHA shape").forEach(shape => {
+            const distance = parseFloat(shape.getAttribute("data-distance"));
+            shape.setAttribute('visible', distance <= sunDistanceRangeSliderValue);
+        });
     }
 });
 
@@ -264,7 +284,7 @@ function processAsteroidData(asteroidData) {
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
 
         // Plot the orbit and the current position in X3D
-        createAsteroidOrbitShape(aOrbitPoints, currentPosition, objectId, PHA);
+        createAsteroidOrbitShape(aOrbitPoints, currentPosition, objectId, PHA, semiMajorAxis);
         
     });
 }
