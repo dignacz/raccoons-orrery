@@ -92,9 +92,41 @@ document.addEventListener("DOMContentLoaded", function() {
         //console.log(sliderValue);
 
         updateDate();
-        processCometData(cometData);
-        processAsteroidData(asteroidData);
-        processPlanetData(planetData);
+
+        /* [ */
+        /*   'cometOrbitContainer', */
+        /*   'asteroidOrbitContainerPHA', */
+        /*   'asteroidOrbitContainerNonPHA', */
+        /*   'planetOrbitContainer' */
+        /* ] */
+        /* .forEach(containerId => { */
+        /*   document.getElementById(containerId)?.remove(); */
+        /* }) */
+        /* window.cometDataProcessed.forEach(obj => { */
+        /*   obj.orbitElement.remove(); */
+        /*   obj.sphereElement.remove(); */
+        /*   createCometeOrbitShape(obj) */
+        /* }) */
+        /* window.asteroidDataProcessed.forEach(obj => { */
+        /*   createAsteroidOrbitShape(obj) */
+        /* }) */
+        window.planetDataProcessed.forEach(obj => {
+          obj.sphereElement.remove();
+          obj.orbitElement.remove();
+          obj.orbitElement = document.createElement("shape");
+          obj.sphereElement = document.createElement("transform");
+          obj.orbitElement.setAttribute('visible', obj.visible)
+          obj.sphereElement.setAttribute('visible', obj.visible)
+          obj.currentPosition = calculateCurrentPosition(
+            obj.eccentricity,
+            obj.semiMajorAxis,
+            obj.inclination,
+            obj.omega,
+            obj.node,
+            obj.tp
+          );
+          createPlanetOrbitShape(obj)
+        })
     };
 });
 
@@ -408,11 +440,17 @@ function processAsteroidData(data) {
         sphereElement.setAttribute('visible', 'false')
 
         return {
+          eccentricity,
+          semiMajorAxis,
+          inclination,
+          omega,
+          node,
+          tp,
+          //
           aOrbitPoints,
           currentPosition,
           objectId,
           PHA,
-          semiMajorAxis,
           orbitElement,
           sphereElement,
         };
@@ -451,6 +489,13 @@ function processPlanetData(data) {
         sphereElement.setAttribute('visible', 'false')
 
         return {
+          eccentricity,
+          semiMajorAxis,
+          inclination,
+          omega,
+          node,
+          tp,
+          //
           pOrbitPoints,
           currentPosition,
           semiMajorAxis,
@@ -488,10 +533,16 @@ function processCometData(data) {
         sphereElement.setAttribute('visible', 'false')
         
         return {
+          eccentricity,
+          semiMajorAxis,
+          inclination,
+          omega,
+          node,
+          tp,
+          //
           cOrbitPoints,
           currentPosition,
           objectId,
-          semiMajorAxis,
           orbitElement,
           sphereElement
         };
