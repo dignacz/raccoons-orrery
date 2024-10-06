@@ -9,6 +9,7 @@ fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
     .then(cometData => {
         console.log(cometData); 
         initializeGlobalData('cometData', cometData, processCometData);
+        renderComets();
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -28,6 +29,7 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
     .then(asteroidData => {
         console.log(asteroidData);  // Now you have access to the JSON data
         initializeGlobalData('asteroidData', asteroidData, processAsteroidData);
+        renderAsteroids();
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -37,6 +39,7 @@ function initializeGlobalData(key, data, processFn) {
 
   window[`${key}Processed`].forEach(obj => {
     obj.rendered = false;
+    obj.hidden = true;
   })
 }
 
@@ -305,4 +308,22 @@ function processAsteroidData(data) {
         // Plot the orbit and the current position in X3D
         /* createAsteroidOrbitShape(aOrbitPoints, currentPosition, objectId, PHA, semiMajorAxis); */
     });
+}
+
+function renderAsteroids() {
+  window.asteroidDataProcessed.forEach(obj => {
+    if (!obj.rendered && !obj.hidden) {
+      createAsteroidOrbitShape(obj.aOrbitPoints, obj.currentPosition, obj.objectId, obj.PHA, obj.semiMajorAxis);
+      obj.rendered = true;
+    }
+  })
+}
+
+function renderComets() {
+  window.cometDataProcessed.forEach(obj => {
+    if (!obj.rendered && !obj.hidden) {
+      createCometeOrbitShape(obj.cOrbitPoints, obj.currentPosition, obj.objectId, obj.semiMajorAxis);
+      obj.rendered = true;
+    }
+  })
 }
