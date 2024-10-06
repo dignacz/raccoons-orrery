@@ -7,12 +7,12 @@ fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
         return response.json();  // Parse the JSON data from the response
     })
     .then(cometData => {
-        console.log(cometData); 
-        initializeGlobalData('cometData', cometData, processCometData);
-        window.cometDataProcessed.forEach(obj => {
-          createCometeOrbitShape(obj)
-        })
-        renderComets();
+        initializeGlobalData(
+          'cometData',
+          cometData,
+          processCometData,
+          createCometeOrbitShape
+        );
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -30,9 +30,6 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
     return response.json();  // Parse the JSON data from the response
 })
     .then(asteroidData => {
-        console.log(asteroidData);  // Now you have access to the JSON data
-        initializeGlobalData('asteroidData', asteroidData, processAsteroidData);
-        renderAsteroids();
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -45,19 +42,21 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/good
     return response.json();  // Parse the JSON data from the response
 })
 .then(planetData => {
-    console.log(planetData);  // Now you have access to the JSON data
-    /* initializeGlobalData('planetData', planetData, processPlanetData); */
-    /* renderPlanets(); */
 })
 .catch(error => console.error('Error loading the JSON file:', error));
 
-function initializeGlobalData(key, data, processFn) {
-  window[key] = data;
-  window[`${key}Processed`] = processFn(data)
+function initializeGlobalData(key, data, processFn, createShapeFn) {
+  console.log('initializing', key, data)
 
-  window[`${key}Processed`].forEach(obj => {
+  window[key] = data;
+  const keyProcessed = `${key}Processed`
+
+  window[keyProcessed] = processFn(data)
+  window[keyProcessed].forEach(obj => {
     obj.visible = false;
+    createShapeFn(obj)
   })
+  console.log('processed', keyProcessed, window[keyProcessed])
 }
 
 // SLIDER
@@ -194,7 +193,7 @@ function createCometeOrbitShape(obj) {
     const cMaterial = document.createElement("material");
     cMaterial.setAttribute("emissiveColor", "0 0 0.1"); // Light blue color for comets
     cAppearance.appendChild(cMaterial);
-    obj.shapeElement.appendChild(cAppearance);
+    obj.orbitElement.appendChild(cAppearance);
 
     const cIndexedLineSet = document.createElement("indexedLineSet");
 
@@ -206,8 +205,8 @@ function createCometeOrbitShape(obj) {
     cCoordinate.setAttribute("point", cOrbitPoints.join(' '));
     cIndexedLineSet.appendChild(cCoordinate);
 
-    obj.shapeElement.appendChild(cIndexedLineSet);
-    cometOrbitContainer.appendChild(obj.shapeElement);
+    obj.orbitElement.appendChild(cIndexedLineSet);
+    cometOrbitContainer.appendChild(obj.orbitElement);
 
     // Create a sphere to mark the current position of the comet
     const currentShape = document.createElement("shape");
@@ -221,13 +220,12 @@ function createCometeOrbitShape(obj) {
     // add semiMajorAxis as metadata for the distance to be able to filter by it
     currentShape.setAttribute("data-distance", semiMajorAxis)
 
-    const currentTransform = document.createElement("transform");
-    currentTransform.setAttribute("translation", currentPosition);
+    obj.sphereElement.setAttribute("translation", currentPosition);
     const currentSphere = document.createElement("sphere");
     currentSphere.setAttribute("radius", "0.008");
     currentShape.appendChild(currentSphere);
-    currentTransform.appendChild(currentShape);
-    cometOrbitContainer.appendChild(currentTransform);
+    obj.sphereElement.appendChild(currentShape);
+    cometOrbitContainer.appendChild(obj.sphereElement);
 }
 
 function createAsteroidOrbitShape(obj) {
@@ -243,7 +241,7 @@ function createAsteroidOrbitShape(obj) {
     }
 
     const asteroidShape = document.createElement("shape");
-    obj.shapeElement = asteroidShape;
+    obj.orbitElement = asteroidShape;
 
     const aAppearance = document.createElement("appearance");
     const aMaterial = document.createElement("material");
@@ -277,23 +275,19 @@ function createAsteroidOrbitShape(obj) {
     }
 
     // Create a sphere to mark the current position of the asteroid
-    const currentShape = document.createElement("shape");
     const currentAppearance = document.createElement("appearance");
     const currentMaterial = document.createElement("material");
     currentMaterial.setAttribute("diffuseColor", "0 1 0"); // Green for the current position marker
     currentAppearance.appendChild(currentMaterial);
-    currentShape.appendChild(currentAppearance);
-
-    // add semiMajorAxis as metadata for the distance to be able to filter by it
-    currentShape.setAttribute("data-distance", semiMajorAxis)
+    obj.sphereElement.appendChild(currentAppearance);
 
     const currentTransform = document.createElement("transform");
     currentTransform.setAttribute("translation", currentPosition);
     const currentSphere = document.createElement("sphere");
-    currentShape.setAttribute("id", objectId); 
+    obj.sphereElement.setAttribute("id", objectId); 
     currentSphere.setAttribute("radius", "0.008");
-    currentShape.appendChild(currentSphere);
-    currentTransform.appendChild(currentShape);
+    obj.sphereElement.appendChild(currentSphere);
+    currentTransform.appendChild(obj.sphereElement);
     if (pha === "Y") {
         asteroidContainerPHA.appendChild(currentTransform);
     }
@@ -351,17 +345,14 @@ function createAsteroidOrbitShape(obj) {
     planetOrbitContainer.appendChild(currentTransform);
 }
 
+function hideObjectsBySunProximity(distance) {
+  function updateDataBySunProximity(obj) {
+    obj.visible = obj.semiMajorAxis <= distance;
+  }
 
-
-
-function updateDataBySunProximity(obj, sunDistanceRangeSliderValue) {
-  obj.visible = obj.semiMajorAxis <= sunDistanceRangeSliderValue;
-}
-
-
-function removeObjectsBySunProximity(distance) {
-  window.cometDataProcessed.forEach(obj => updateDataBySunProximity(obj, distance));
-  /* window.asteroidDataProcessed.forEach(obj => updateDataBySunProximity(obj, distance)); */
+  window.cometDataProcessed.forEach(updateDataBySunProximity);
+  /* window.asteroidDataProcessed.forEach(updateDataBySunProximity); */
+  /* window.planetDataProcessed.forEach(updateDataBySunProximity); */
 }
 
 // read message and hide elements exceeding the value
@@ -383,8 +374,8 @@ window.addEventListener("message", function(event) {
 
 
 function handleSunDistanceRangeSlider(value) {
-  removeObjectsBySunProximity(value);
-  renderAsteroids()
+  hideObjectsBySunProximity(value);
+  /* renderAsteroids() */
   renderComets();
 }
 
@@ -489,12 +480,21 @@ function processCometData(data) {
         const cOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
        
-        const shapeElement = document.createElement("shape");
-        shapeElement.setAttribute('visible', 'false')
+        const orbitElement = document.createElement("shape");
+        orbitElement.setAttribute('visible', 'false')
         
-        return {cOrbitPoints, currentPosition, objectId, semiMajorAxis, shapeElement};
+        const sphereElement = document.createElement("transform");
+        sphereElement.setAttribute('visible', 'false')
+        
+        return {
+          cOrbitPoints,
+          currentPosition,
+          objectId,
+          semiMajorAxis,
+          orbitElement,
+          sphereElement
+        };
       
-
         // Check if comet already exists and clear previous position
         const existingComet = document.getElementById(objectId);
         if (existingComet) {
@@ -510,7 +510,8 @@ function processCometData(data) {
 function renderObjects(key) {
   window[key].forEach(obj => {
     console.log('setting visible', obj.visible)
-    obj.shapeElement.setAttribute("visible", obj.visible)
+    obj.orbitElement.setAttribute("visible", obj.visible)
+    obj.sphereElement.setAttribute("visible", obj.visible)
   })
 }
 
