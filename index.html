@@ -12,6 +12,7 @@
     <script src="js/allObjects.js"></script>
     <script src="js/toggleOrbits.js"></script>
     <script src="js/table.js"></script>
+    <script src="js/sunDistanceRangeSlider.js"></script>
     <style>
         html, body {
             height: 100%;
@@ -76,6 +77,12 @@
                 <button id="toggleAsteroidsPHA" />
                 <button id="toggleAsteroidsNonPHA" />
                 <button id="toggleComets" />
+            </div>
+            <div class="slider-container">
+              <div class="value-container">
+                <span id="sunDistanceRangeSliderOutput">0</span>
+              </div>
+              <input type="range" min=0 max=100 value=0 class="slider" id="sunDistanceRangeSlider">
             </div>
         </div>
         <div class="app-content">
