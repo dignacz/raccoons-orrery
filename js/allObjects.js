@@ -33,7 +33,6 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
-<<<<<<< HEAD
 // PlanetData
 fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/good-morning-pineapple/planets_data.json')
 .then(response => {
@@ -48,7 +47,7 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/good
     processPlanetData(planetData);
 })
 .catch(error => console.error('Error loading the JSON file:', error));
-=======
+
 function initializeGlobalData(key, data, processFn) {
   window[key] = data;
   window[`${key}Processed`] = processFn(data)
@@ -58,11 +57,6 @@ function initializeGlobalData(key, data, processFn) {
     obj.hidden = true;
   })
 }
-
-
-// SLIDER
->>>>>>> 8818c44cb4c91d8a5b98d9f2739cbfe0691fa5ee
-
 
 // SLIDER
 let sliderValue = 0; // Declare a global variable
@@ -192,18 +186,6 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
 // 4. Function to create and append comet orbit and position marker to x3dom scene
 function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis) {
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
-<<<<<<< HEAD
-
-    
-       // Set visibility based on the current state
-const isHidden = cometOrbitContainer.getAttribute('data-is-hidden') === 'true';
-if (!isHidden) {
-    cometOrbitContainer.setAttribute('visible', 'true');
-} else {
-    cometOrbitContainer.setAttribute('visible', 'false');
-}
-=======
->>>>>>> 8818c44cb4c91d8a5b98d9f2739cbfe0691fa5ee
 
     const cometShape = document.createElement("shape");
     const cAppearance = document.createElement("appearance");
@@ -252,28 +234,8 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
 
     if (pha === "Y") {
         asteroidContainerPHA = document.getElementById("asteroidOrbitContainerPHA");
-<<<<<<< HEAD
-        // Set visibility based on the current state
-const isHiddenPHA = asteroidContainerPHA.getAttribute('data-is-hidden') === 'true';
-if (!isHiddenPHA) {
-    asteroidContainerPHA.setAttribute('visible', 'true');
-} else {
-    asteroidContainerPHA.setAttribute('visible', 'false');
-} // Ensure it's visible by default
-
     } else {
         asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
-        // Set visibility based on the current state
-const isHiddenNonPHA = asteroidContainerNonPHA.getAttribute('data-is-hidden') === 'true';
-if (!isHiddenNonPHA) {
-    asteroidContainerNonPHA.setAttribute('visible', 'true');
-} else {
-    asteroidContainerNonPHA.setAttribute('visible', 'false');
-} // Ensure it's visible by default
-=======
-    } else {
-        asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
->>>>>>> 8818c44cb4c91d8a5b98d9f2739cbfe0691fa5ee
     }
 
     const asteroidShape = document.createElement("shape");
@@ -285,6 +247,7 @@ if (!isHiddenNonPHA) {
     } else {
         aMaterial.setAttribute("emissiveColor", "0.15 0.15 0.15"); // Grey color for non-hazardous asteroids
     }
+
     aAppearance.appendChild(aMaterial);
     asteroidShape.appendChild(aAppearance);
     asteroidShape.setAttribute("id", objectId); 
@@ -530,7 +493,6 @@ function processAsteroidData(data) {
     });
 }
 
-<<<<<<< HEAD
 // Process Planet Data
 function processPlanetData(planetData) {
     planetData.forEach(obj => {
@@ -559,7 +521,7 @@ function processPlanetData(planetData) {
         
     });
 }
-=======
+
 function renderAsteroids() {
   window.asteroidDataProcessed.forEach(obj => {
     if (!obj.rendered && !obj.hidden) {
@@ -577,4 +539,3 @@ function renderComets() {
     }
   })
 }
->>>>>>> 8818c44cb4c91d8a5b98d9f2739cbfe0691fa5ee
