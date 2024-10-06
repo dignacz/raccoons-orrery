@@ -34,6 +34,8 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
+// PlanetData
+
 // SLIDER
 let sliderValue = 0; // Declare a global variable
 
