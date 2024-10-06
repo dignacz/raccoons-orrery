@@ -8,8 +8,7 @@ fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
     })
     .then(cometData => {
         console.log(cometData); 
-        initializeData('cometData', cometData);
-        processCometData();
+        initializeGlobalData('cometData', cometData, processCometData);
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
@@ -28,18 +27,17 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
 })
     .then(asteroidData => {
         console.log(asteroidData);  // Now you have access to the JSON data
-        initializeData('asteroidData', asteroidData);
-        // displayData(asteroidData);
-        processAsteroidData();
+        initializeGlobalData('asteroidData', asteroidData, processAsteroidData);
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
-function initializeData(key, data) {
-  data.forEach(obj => {
+function initializeGlobalData(key, data, processFn) {
+  window[key] = data;
+  window[`${key}Processed`] = processFn(data)
+
+  window[`${key}Processed`].forEach(obj => {
     obj.rendered = false;
   })
-
-  window[key] = data;
 }
 
 
@@ -235,8 +233,8 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
 
 
 // Process Comet Data
-function processCometData() {
-    window.cometData.forEach(obj => {
+function processCometData(data) {
+    return data.map(obj => {
         let eccentricity = parseFloat(obj.e);
         let perihelionDistance = parseFloat(obj.q_au_1);
         let inclination = parseFloat(obj.i_deg);
@@ -250,9 +248,12 @@ function processCometData() {
         let semiMajorAxis = calculateSemiMajorAxis(eccentricity, perihelionDistance);
         const cOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
+        
+        return {cOrbitPoints, currentPosition, objectId, semiMajorAxis};
+      
 
         // Plot the orbit and the current position in X3D
-        createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis);
+        /* createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis); */
 
     });
 }
@@ -285,8 +286,8 @@ window.addEventListener("message", function(event) {
 });
 
 // Process Asteroid Data
-function processAsteroidData() {
-    window.asteroidData.forEach(obj => {
+function processAsteroidData(data) {
+    return data.map(obj => {
         const eccentricity = parseFloat(obj.e);
         const semiMajorAxis = parseFloat(obj.a);
         const inclination = parseFloat(obj.i);
@@ -300,8 +301,8 @@ function processAsteroidData() {
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
 
+        return {aOrbitPoints, currentPosition, objectId, PHA, semiMajorAxis};
         // Plot the orbit and the current position in X3D
-        createAsteroidOrbitShape(aOrbitPoints, currentPosition, objectId, PHA, semiMajorAxis);
-        
+        /* createAsteroidOrbitShape(aOrbitPoints, currentPosition, objectId, PHA, semiMajorAxis); */
     });
 }
