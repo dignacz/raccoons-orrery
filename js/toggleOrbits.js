@@ -44,4 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Toggle Comets
     setupToggle('toggleComets', 'cometOrbitContainer', 'Toggle Comets');
+
+    // Toggle Planets
+    setupToggle('togglePlanets', 'planetOrbitContainer', 'Toggle Planets');
 });
