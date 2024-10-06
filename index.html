@@ -77,6 +77,11 @@
                 <button id="toggleAsteroidsPHA" />
                 <button id="toggleAsteroidsNonPHA" />
                 <button id="toggleComets" />
+                <button id="togglePlanets" />
+            </div>
+            <div class="slider">
+                <input type="range" id="date-slider" min="2457023.5" max="2462719.5" value="2458528.9" step="0.1">
+                <p>Current Date: <span id="demo">0</span></p>
             </div>
             <div class="slider-container">
               <div class="value-container">
@@ -101,12 +106,13 @@
                     <group id="cometOrbitContainer"></group>
                     <group id="asteroidOrbitContainerPHA"></group>
                     <group id="asteroidOrbitContainerNonPHA"></group>
+                    <group id="planetOrbitContainer"></group>
                 </scene>
             </x3d>
         </div>
     </div>
     <div id="infoTable">
-        <h4>Asteroid/Comet Information</h4>
+        <h4>Object information (Planet/Asteroid/Comet)</h4>
         <p>Name: <span id="infoName">N/A</span></p>
         <p>Eccentricity: <span id="infoEccentricity">N/A</span></p>
         <p>Perihelion Distance: <span id="infoSemiMajorAxis">N/A</span></p>
@@ -118,42 +124,45 @@
     
     <script>
         function sceneClick(event) {
-            const target = event.target;
-    
-            // Verificar si el objeto tiene un id y si es "sun"
-            if (target && target.getAttribute('id')) {
-                const objectId = target.getAttribute('id');
-                console.log('Object ID:', objectId);
-    
-                // Si se hace clic en el sol, imprimir mensaje en pantalla
-                if (objectId === 'sun') {
-                    alert('¡Ten cuidado donde haces clic! No queremos que te quemes :)');
-                    return; // No continuar con el procesamiento para otros objetos
-                }
-    
-                // Buscar la información del cometa o asteroide
-                let obj = findAsteroidOrCometData(objectId);
-                if (obj) {
-                    let eccentricity = parseFloat(obj.e);
-                    let perihelionDistance = parseFloat(obj.a || obj.q_au_1); // Asteroides usan 'a', cometas usan 'q_au_1'
-                    let inclination = parseFloat(obj.i || obj.i_deg);
-                    let omega = parseFloat(obj.w || obj.w_deg);
-                    let node = parseFloat(obj.om || obj.node_deg);
-                    let objectName = obj.full_name || obj.object_name;
-                    let tp = parseFloat(obj.tp || obj.tp_tdb);
-                    let pha = obj.pha || 'N/A';
-    
-                    // Actualizar la tabla de información en la página
-                    updateInfoTable(objectName, eccentricity, perihelionDistance, inclination, omega, node, tp, pha);
-                }
-            }
+    const target = event.target;
+
+    // Verificar si el objeto tiene un id y si es "sun"
+    if (target && target.getAttribute('id')) {
+        const objectId = target.getAttribute('id');
+        console.log('Object ID:', objectId);
+
+        // Si se hace clic en el sol, imprimir mensaje en pantalla
+        if (objectId === 'sun') {
+            alert('¡Ten cuidado donde haces clic! No queremos que te quemes :)');
+            return; // No continuar con el procesamiento para otros objetos
         }
-    
-        function findAsteroidOrCometData(objectId) {
-            // Buscar los datos según el ID del objeto
-            return window.cometData?.find(comet => comet.object_name === objectId) || 
-                   window.asteroidData?.find(asteroid => asteroid.full_name === objectId);
+
+        // Buscar la información del cometa, asteroide o planeta
+        let obj = findSpaceObjectData(objectId);
+        if (obj) {
+            let eccentricity = parseFloat(obj.e || obj.e_rad);
+            let perihelionDistance = parseFloat(obj.a || obj.q_au_1 || obj.a_au); // Asteroides usan 'a', cometas usan 'q_au_1', planetas usan 'a_au'
+            let inclination = parseFloat(obj.i || obj.i_deg || obj.I_deg);
+            let omega = parseFloat(obj.w || obj.w_deg || (obj.long_peri_deg-obj.long_node_deg));
+            let node = parseFloat(obj.om || obj.node_deg || obj.long_node_deg);
+            let objectName = obj.full_name || obj.object_name || obj.name;
+            let tp = parseFloat(obj.tp || obj.tp_tdb || obj.tp_julian);
+            let pha = obj.pha || 'N/A';
+
+            // Actualizar la tabla de información en la página
+            updateInfoTable(objectName, eccentricity, perihelionDistance, inclination, omega, node, tp, pha);
         }
+    }
+}
+
+function findSpaceObjectData(objectId) {
+    // Buscar los datos según el ID del objeto
+    return window.cometData?.find(comet => comet.object_name === objectId) || 
+           window.asteroidData?.find(asteroid => asteroid.full_name === objectId) ||
+           window.planetData?.find(planet => planet.name === objectId);
+}
+
+
     </script>
     
     

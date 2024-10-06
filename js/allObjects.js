@@ -33,6 +33,22 @@ fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/main
     })
     .catch(error => console.error('Error loading the JSON file:', error));
 
+<<<<<<< HEAD
+// PlanetData
+fetch('https://raw.githubusercontent.com/dignacz/raccoons-orrery/refs/heads/good-morning-pineapple/planets_data.json')
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
+    }
+    return response.json();  // Parse the JSON data from the response
+})
+.then(planetData => {
+    console.log(planetData);  // Now you have access to the JSON data
+    window.planetData = planetData; // Store comet data globally for click access
+    processPlanetData(planetData);
+})
+.catch(error => console.error('Error loading the JSON file:', error));
+=======
 function initializeGlobalData(key, data, processFn) {
   window[key] = data;
   window[`${key}Processed`] = processFn(data)
@@ -45,12 +61,55 @@ function initializeGlobalData(key, data, processFn) {
 
 
 // SLIDER
+>>>>>>> 8818c44cb4c91d8a5b98d9f2739cbfe0691fa5ee
 
- // Calculate Julian Centuries for a given date
- function getJulianDate() {
-    const date = new Date(Date.UTC(2020, 1, 8, 15));
-    return 2451545.0 + (date - new Date(Date.UTC(2000, 0, 1, 12))) / 86400000;
+
+// SLIDER
+let sliderValue = 0; // Declare a global variable
+
+document.addEventListener("DOMContentLoaded", function() {
+    var output = document.getElementById("demo");
+    var slider = document.getElementById("date-slider");
+
+    // Set default value for output and global slider value
+    sliderValue = slider.value;
+    output.innerHTML = sliderValue;
+
+    slider.oninput = function() {
+        var value = (this.value - this.min) / (this.max - this.min) * 100;
+
+        this.style.background = 'linear-gradient(to right, #6b8dff 0%, #ff2a5f ' + value + '%, #fff ' + value + '%, #fff 100%)';
+
+        sliderValue = this.value; // Update the global variable
+        output.innerHTML = sliderValue;
+        //console.log(sliderValue);
+
+        updateDate();
+        processCometData(cometData);
+        processAsteroidData(asteroidData);
+        processPlanetData(planetData);
+    };
+});
+
+ //JULIAN DATE - GREGORIAN DATE CONVERTER
+
+ function julianToGregorian(julianDate) {
+    const J1970 = 2440587.5;
+    const dayMilliseconds = 86400000;
+    const date = new Date((julianDate - J1970) * dayMilliseconds);
+    return date.toISOString().split('T')[0];
 }
+
+function updateDate() {
+    const slider = document.getElementById("date-slider");
+    const output = document.getElementById("demo");
+    const gregorianDate = julianToGregorian(parseFloat(slider.value));
+    output.textContent = gregorianDate;
+}
+
+window.onload = function() {
+    updateDate(); // Initialize with current slider value
+};
 
 // 1. Function to calculate semi-major axis
 function calculateSemiMajorAxis(e, q) {
@@ -59,6 +118,19 @@ function calculateSemiMajorAxis(e, q) {
     }
     return q / (1 - e);  // Semi-major axis formula
 }
+
+// Eccentricity RAD to DEG (PLANETS ONLY)
+
+function convertEccentricityRadToDeg(eccentricityRad) {
+    const degrees = eccentricityRad * (180 / Math.PI);
+    return degrees;
+  }
+
+// Argument of Perihelion (PLANETS ONLY)
+  function calculateArgumentOfPerihelion(perihelionLongitudeDeg, ascendingNodeLongitudeDeg) {
+    const argumentOfPerihelion = perihelionLongitudeDeg - ascendingNodeLongitudeDeg;
+    return argumentOfPerihelion;
+  }
 
 // 2. Function to calculate the orbit points
 function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node, numPoints = 100) {
@@ -91,8 +163,8 @@ function calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, n
 
 // 3. Function to calculate the current position of a comet in its orbit
 function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp) {
-    let t = getJulianDate(); // Current time in Julian date
-    console.log(t);
+    let t = sliderValue; // Current time in Julian date
+    //console.log(t);
     let meanMotion = Math.sqrt(1 / Math.pow(semiMajorAxis, 3));
     let meanAnomaly = meanMotion * (t - tp);
     let trueAnomaly = meanAnomaly; // Simplified - normally we would iterate to solve Kepler's equation
@@ -120,6 +192,18 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
 // 4. Function to create and append comet orbit and position marker to x3dom scene
 function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis) {
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
+<<<<<<< HEAD
+
+    
+       // Set visibility based on the current state
+const isHidden = cometOrbitContainer.getAttribute('data-is-hidden') === 'true';
+if (!isHidden) {
+    cometOrbitContainer.setAttribute('visible', 'true');
+} else {
+    cometOrbitContainer.setAttribute('visible', 'false');
+}
+=======
+>>>>>>> 8818c44cb4c91d8a5b98d9f2739cbfe0691fa5ee
 
     const cometShape = document.createElement("shape");
     const cAppearance = document.createElement("appearance");
@@ -168,8 +252,28 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
 
     if (pha === "Y") {
         asteroidContainerPHA = document.getElementById("asteroidOrbitContainerPHA");
+<<<<<<< HEAD
+        // Set visibility based on the current state
+const isHiddenPHA = asteroidContainerPHA.getAttribute('data-is-hidden') === 'true';
+if (!isHiddenPHA) {
+    asteroidContainerPHA.setAttribute('visible', 'true');
+} else {
+    asteroidContainerPHA.setAttribute('visible', 'false');
+} // Ensure it's visible by default
+
     } else {
         asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
+        // Set visibility based on the current state
+const isHiddenNonPHA = asteroidContainerNonPHA.getAttribute('data-is-hidden') === 'true';
+if (!isHiddenNonPHA) {
+    asteroidContainerNonPHA.setAttribute('visible', 'true');
+} else {
+    asteroidContainerNonPHA.setAttribute('visible', 'false');
+} // Ensure it's visible by default
+=======
+    } else {
+        asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
+>>>>>>> 8818c44cb4c91d8a5b98d9f2739cbfe0691fa5ee
     }
 
     const asteroidShape = document.createElement("shape");
@@ -179,7 +283,7 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
     if (pha === "Y") {
         aMaterial.setAttribute("emissiveColor", "1 0 0"); // Red color for potentially hazardous asteroids
     } else {
-        aMaterial.setAttribute("emissiveColor", "0.30 0.30 0.30"); // Grey color for non-hazardous asteroids
+        aMaterial.setAttribute("emissiveColor", "0.15 0.15 0.15"); // Grey color for non-hazardous asteroids
     }
     aAppearance.appendChild(aMaterial);
     asteroidShape.appendChild(aAppearance);
@@ -230,6 +334,55 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
     }
 }
 
+ function createPlanetOrbitShape(pOrbitPoints, currentPosition, objectId) {
+    const planetOrbitContainer = document.getElementById("planetOrbitContainer");
+
+    // Set visibility based on the current state
+    const isHiddenPlanet = planetOrbitContainer.getAttribute('data-is-hidden') === 'true';
+    if (!isHiddenPlanet) {
+        planetOrbitContainer.setAttribute('visible', 'true');
+    } else {
+        planetOrbitContainer.setAttribute('visible', 'false');
+    }
+
+    const planetShape = document.createElement("shape");
+    const pAppearance = document.createElement("appearance");
+    const pMaterial = document.createElement("material");
+    pMaterial.setAttribute("emissiveColor", "0.75 0.75 0.75"); // Darker color for planets
+    pAppearance.appendChild(pMaterial);
+    planetShape.appendChild(pAppearance);
+
+    const pIndexedLineSet = document.createElement("indexedLineSet");
+
+    // Add coordIndex (this just connects the points in a sequential manner)
+    let coordIndex = Array.from({ length: pOrbitPoints.length }, (_, i) => i).join(' ') + " -1"; // "-1" ends the sequence
+    pIndexedLineSet.setAttribute("coordIndex", coordIndex);
+
+    const pCoordinate = document.createElement("coordinate");
+    pCoordinate.setAttribute("point", pOrbitPoints.join(' '));
+    pIndexedLineSet.appendChild(pCoordinate);
+
+    planetShape.appendChild(pIndexedLineSet);
+    planetOrbitContainer.appendChild(planetShape);
+
+    // Create a sphere to mark the current position of the planet
+    const currentShape = document.createElement("shape");
+    const currentAppearance = document.createElement("appearance");
+    const currentMaterial = document.createElement("material");
+    currentMaterial.setAttribute("diffuseColor", "0.87 0.49 0.0"); // Orange color for the current position marker
+    currentAppearance.appendChild(currentMaterial);
+    currentShape.appendChild(currentAppearance);
+    currentShape.setAttribute("id", objectId);
+
+    const currentTransform = document.createElement("transform");
+    currentTransform.setAttribute("translation", currentPosition);
+    const currentSphere = document.createElement("sphere");
+    currentSphere.setAttribute("radius", "0.02"); // Bigger radius for planets
+    currentShape.appendChild(currentSphere);
+    currentTransform.appendChild(currentShape);
+    planetOrbitContainer.appendChild(currentTransform);
+}
+
 
 
 // Process Comet Data
@@ -240,9 +393,10 @@ function processCometData(data) {
         let inclination = parseFloat(obj.i_deg);
         let omega = parseFloat(obj.w_deg);
         let node = parseFloat(obj.node_deg);
-        let objectName = obj.object_name;
+        //let objectName = obj.object_name;
         let tp = parseFloat(obj.tp_tdb);
         let objectId = obj.object_name;
+       //console.log(obj);
 
         // Calculate semi-major axis for each object
         let semiMajorAxis = calculateSemiMajorAxis(eccentricity, perihelionDistance);
@@ -251,6 +405,12 @@ function processCometData(data) {
         
         return {cOrbitPoints, currentPosition, objectId, semiMajorAxis};
       
+
+        // Check if comet already exists and clear previous position
+        const existingComet = document.getElementById(objectId);
+        if (existingComet) {
+            existingComet.remove();
+        }
 
         // Plot the orbit and the current position in X3D
         /* createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis); */
@@ -351,10 +511,18 @@ function processAsteroidData(data) {
         const tp = parseFloat(obj.tp);
         const PHA = obj.pha; // Corrected to retrieve PHA as a string
         const objectId = obj.full_name;
+        //console.log(obj);
 
         // Calculate the orbit points and current position
         const aOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
         const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
+        //console.log(currentPosition);
+
+        // Check if comet already exists and clear previous position
+        const existingAsteroid = document.getElementById(objectId);
+        if (existingAsteroid) {
+            existingAsteroid.remove();
+        }
 
         return {aOrbitPoints, currentPosition, objectId, PHA, semiMajorAxis};
         // Plot the orbit and the current position in X3D
@@ -362,6 +530,36 @@ function processAsteroidData(data) {
     });
 }
 
+<<<<<<< HEAD
+// Process Planet Data
+function processPlanetData(planetData) {
+    planetData.forEach(obj => {
+        const eccentricity = parseFloat(obj.e_rad);
+        const semiMajorAxis = parseFloat(obj.a_au);
+        const inclination = parseFloat(obj.I_deg);
+        const longperi = parseFloat(obj.long_peri_deg);
+        const node = parseFloat(obj.long_node_deg);
+        const omega = longperi - node;
+        const tp = parseFloat(obj.tp_julian);
+        const objectId = obj.name;
+        //console.log(obj);
+
+        // Calculate the orbit points and current position
+        const pOrbitPoints = calculateOrbitPoints(eccentricity, semiMajorAxis, inclination, omega, node);
+        const currentPosition = calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omega, node, tp);
+
+        // Check if comet already exists and clear previous position
+        const existingPlanet = document.getElementById(objectId);
+        if (existingPlanet) {
+            existingPlanet.remove();
+        }
+
+        // Plot the orbit and the current position in X3D
+        createPlanetOrbitShape(pOrbitPoints, currentPosition, objectId);
+        
+    });
+}
+=======
 function renderAsteroids() {
   window.asteroidDataProcessed.forEach(obj => {
     if (!obj.rendered && !obj.hidden) {
@@ -379,3 +577,4 @@ function renderComets() {
     }
   })
 }
+>>>>>>> 8818c44cb4c91d8a5b98d9f2739cbfe0691fa5ee
