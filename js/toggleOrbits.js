@@ -12,30 +12,17 @@ document.addEventListener('DOMContentLoaded', function () {
     function setupToggle(toggleButtonId, containerId, label) {
         const toggleButton = document.getElementById(toggleButtonId);
 
-        const container = document.getElementById(containerId);
-
-        // Set initial state if not already set
-        if (!container.hasAttribute('data-is-hidden')) {
-            container.setAttribute('data-is-hidden', 'true'); // Default hidden
-        }
-
-        toggleButton.textContent = turnOff(label);
+        toggleButton.textContent = turnOn(label);
 
         toggleButton.addEventListener('click', function(e) {
             const container = document.getElementById(containerId);
             const isOn = getIsOn(container);
+            console.log('le isOn',containerId, isOn);
 
             // Change label
             e.target.textContent = isOn ? turnOn(label) : turnOff(label);
             
             window.postMessage({ type: 'toggleOrbits', value: { containerId, isOn } }, '*');
-
-            if (container) {
-                const isHidden = container.getAttribute('visible') === 'false';
-                // Toggle visibility
-            container.setAttribute('visible', isHidden ? 'true' : 'false');
-            container.setAttribute('data-is-hidden', isHidden ? 'false' : 'true');
-            }
         });
     }
 

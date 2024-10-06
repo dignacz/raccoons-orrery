@@ -386,27 +386,8 @@ function handleSunDistanceRangeSlider(value) {
 function handleToggleOrbits(value) {
   const { containerId, isOn } = value;
   
-  function toggleOrbits(obj) {
-    return obj.visible = !isOn; 
-  }
-  
-  switch (containerId) {
-    case "asteroidOrbitContainerPHA":
-      window.asteroidDataProcessed.forEach(toggleOrbits);
-      renderAsteroids();
-      break;
-
-    case "asteroidOrbitContainerNonPHA":
-      window.asteroidDataProcessed.forEach(toggleOrbits);
-      renderAsteroids();
-      break;
-
-    case "cometOrbitContainer":
-      document.getElementById("cometOrbitContainer").setAttribute("visible", isOn);
-      break;
-  }
+  document.getElementById(containerId).setAttribute("visible", isOn);
 }
-
 
 // Process Asteroid Data
 function processAsteroidData(data) {
