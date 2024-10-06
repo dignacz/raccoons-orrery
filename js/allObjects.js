@@ -120,7 +120,6 @@ function calculateCurrentPosition(eccentricity, semiMajorAxis, inclination, omeg
 // 4. Function to create and append comet orbit and position marker to x3dom scene
 function createCometeOrbitShape(cOrbitPoints, currentPosition, objectId, semiMajorAxis) {
     const cometOrbitContainer = document.getElementById("cometOrbitContainer");
-    cometOrbitContainer.setAttribute('visible', 'false'); // Ensure it's visible by default
 
     const cometShape = document.createElement("shape");
     const cAppearance = document.createElement("appearance");
@@ -169,10 +168,8 @@ function createAsteroidOrbitShape(orbitPoints, currentPosition, objectId, pha = 
 
     if (pha === "Y") {
         asteroidContainerPHA = document.getElementById("asteroidOrbitContainerPHA");
-        asteroidContainerPHA.setAttribute('visible', 'false'); // Ensure it's visible by default
     } else {
         asteroidContainerNonPHA = document.getElementById("asteroidOrbitContainerNonPHA");
-        asteroidContainerNonPHA.setAttribute('visible', 'false'); // Ensure it's visible by default
     }
 
     const asteroidShape = document.createElement("shape");
@@ -265,6 +262,8 @@ function updateDataBySunProximity(obj, sunDistanceRangeSliderValue) {
   if (obj.semiMajorAxis > sunDistanceRangeSliderValue) {
     obj.hidden = true;
     obj.rendered = false;
+  } else {
+    obj.hidden = false;
   }
 }
 
@@ -275,7 +274,7 @@ function removeElementsBySunProximity(shape, sunDistanceRangeSliderValue) {
   }
 }
 
-function deleteObjectsBySunProximity(event) {
+function removeObjectsBySunProximity(event) {
   const sunDistanceRangeSliderValue = event.data.value;
   window.cometDataProcessed.forEach(obj => updateDataBySunProximity(obj, sunDistanceRangeSliderValue));
   window.asteroidDataProcessed.forEach(obj => updateDataBySunProximity(obj, sunDistanceRangeSliderValue));
@@ -295,7 +294,9 @@ function deleteObjectsBySunProximity(event) {
 // read message and hide elements exceeding the value
 window.addEventListener("message", function(event) {
   if (event.data.type === "sunDistanceRangeSlider") {
-    deleteObjectsBySunProximity(event);
+    removeObjectsBySunProximity(event);
+    renderAsteroids();
+    renderComets();
   }
 });
 
