@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Toggle Asteroids (Non-PHA N)
     setupToggle('toggleAsteroidsNonPHA', 'asteroidOrbitContainerNonPHA', 'Toggle Asteroids (Non-PHA Y)');
 
-    // Toggle Comets
-    setupToggle('toggleComets', 'cometOrbitContainer', 'Toggle Comets');
+    // // Toggle Comets
+    // setupToggle('toggleComets', 'cometOrbitContainer', 'Toggle Comets');
 
     // Toggle Planets
     setupToggle('togglePlanets', 'planetOrbitContainer', 'Toggle Planets');

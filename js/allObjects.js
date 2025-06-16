@@ -1,20 +1,21 @@
 // CometData
-fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-        }
-        return response.json();  // Parse the JSON data from the response
-    })
-    .then(cometData => {
-        initializeGlobalData(
-          'cometData',
-          cometData,
-          processCometData,
-          createCometeOrbitShape
-        );
-    })
-    .catch(error => console.error('Error loading the JSON file:', error));
+//commenting it out due to data not available anymore
+// fetch('https://data.nasa.gov/resource/b67r-rgxc.json')
+//     .then(response => {
+//         if (!response.ok) {
+//             throw new Error('Network response was not ok ' + response.statusText);
+//         }
+//         return response.json();  // Parse the JSON data from the response
+//     })
+//     .then(cometData => {
+//         initializeGlobalData(
+//           'cometData',
+//           cometData,
+//           processCometData,
+//           createCometeOrbitShape
+//         );
+//     })
+//     .catch(error => console.error('Error loading the JSON file:', error));
 
 // Degrees to Radians
 function degreesToRadians(degrees) {
@@ -118,10 +119,10 @@ document.addEventListener("DOMContentLoaded", function() {
         recalculatePositions(obj);
         createAsteroidOrbitShape(obj)
       })
-      window.cometDataProcessed.forEach(obj => {
-        recalculatePositions(obj);
-        createCometeOrbitShape(obj)
-      })
+      // window.cometDataProcessed.forEach(obj => {
+      //   recalculatePositions(obj);
+      //   createCometeOrbitShape(obj)
+      // })
     };
 });
 
@@ -368,7 +369,7 @@ function hideObjectsBySunProximity(distance) {
     obj.visible = obj.semiMajorAxis <= distance;
   }
 
-  window.cometDataProcessed.forEach(updateDataBySunProximity);
+  // window.cometDataProcessed.forEach(updateDataBySunProximity);
   window.asteroidDataProcessed.forEach(updateDataBySunProximity);
   window.planetDataProcessed.forEach(updateDataBySunProximity);
 }
@@ -394,7 +395,7 @@ window.addEventListener("message", function(event) {
 function handleSunDistanceRangeSlider(value) {
   hideObjectsBySunProximity(value);
   renderAsteroids()
-  renderComets();
+  // renderComets();
   renderPlanets();
 }
 
